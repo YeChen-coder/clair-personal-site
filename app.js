@@ -159,10 +159,23 @@
       "soil.eyebrow": "土壤与根系",
       "soil.title": "根",
       "soil.lead": "果树扎在这片土里——不是闪光简历栏，是滋养树的底。",
-      "soil.mcmaster.title": "McMaster · SEP 课程",
-      "soil.mcmaster.desc":
-        "赛博物理与嵌入式相关课程项目——SEP 769（Cyber Physical Systems / 智能升降学习站）、SEP 742（RC 车车道保持）。是树干下方的养分，不是树冠上的装饰。",
-      "soil.more": "更多根系以后再补——有把握才写进土里，不编造学位或日期。",
+      "soil.group.edu": "学历",
+      "soil.group.exp": "经历",
+      "soil.group.cert": "认证",
+      "soil.edu.mcmaster.title": "McMaster University · 工程硕士（系统与技术）",
+      "soil.edu.mcmaster.meta": "加拿大安大略省汉密尔顿 · 2026 年 4 月毕业",
+      "soil.edu.mcmaster.sep":
+        "附带养分：SEP 769（赛博物理 / 智能升降学习站）、SEP 742（RC 车车道保持）——树干下的课程实践，不是树上的果。",
+      "soil.edu.cugb.title": "中国地质大学（北京）· 工学学士（计算机科学与技术）",
+      "soil.edu.cugb.meta": "北京 · 2020 年 6 月结业",
+      "soil.exp.ms.title": "Microsoft（经由 Wicresoft）· Azure 工程师",
+      "soil.exp.ms.meta": "上海 · 2021 年 4 月 – 2024 年 8 月（3 年 5 个月）",
+      "soil.exp.ms.desc":
+        "Azure AI Bot Service、Microsoft Defender for Endpoint / Cloud 的技术支持与咨询；跨 Azure、Windows、Linux、macOS 排障与技术升级；曾在越南做知识传递与培训；累计处理 500+ 案例。",
+      "soil.cert.aws.ml": "AWS Certified Machine Learning – Specialty",
+      "soil.cert.aws.cp": "AWS Certified Cloud Practitioner",
+      "soil.cert.pmp": "Project Management Professional (PMP)",
+      "soil.cert.google": "Google Data Analytics",
       "about.eyebrow": "怎么干活",
       "about.title": "关于",
       "about.p1":
@@ -236,11 +249,25 @@
       "soil.title": "Roots",
       "soil.lead":
         "The fruit tree is rooted in this soil — not a flashy résumé block, just what feeds the tree.",
-      "soil.mcmaster.title": "McMaster · SEP courses",
-      "soil.mcmaster.desc":
-        "Cyber-physical and embedded coursework projects — SEP 769 (Cyber Physical Systems / smart sit-stand learning station), SEP 742 (RC car lane keep). Nutrients under the trunk, not ornaments in the crown.",
-      "soil.more":
-        "More roots can be filled in later — only what I’m sure of goes in the soil; no invented degrees or dates.",
+      "soil.group.edu": "Education",
+      "soil.group.exp": "Experience",
+      "soil.group.cert": "Certifications",
+      "soil.edu.mcmaster.title":
+        "McMaster University · Master of Engineering, Systems and Technology",
+      "soil.edu.mcmaster.meta": "Hamilton, Ontario, Canada · Graduated April 2026",
+      "soil.edu.mcmaster.sep":
+        "Lighter nutrient: SEP 769 (Cyber Physical Systems / smart ergonomic learning station), SEP 742 (RC car lane keep) — coursework under the trunk, not fruit in the crown.",
+      "soil.edu.cugb.title":
+        "China University of Geosciences, Beijing · Bachelor of Engineering, Computer Science and Technology",
+      "soil.edu.cugb.meta": "Beijing, China · Ended June 2020",
+      "soil.exp.ms.title": "Microsoft (via Wicresoft) · Azure Engineer",
+      "soil.exp.ms.meta": "Shanghai · April 2021 – August 2024 (3 years 5 months)",
+      "soil.exp.ms.desc":
+        "Technical support and consulting on Azure AI Bot Service and Microsoft Defender for Endpoint / Cloud; troubleshooting across Azure, Windows, Linux, and macOS; technical escalations; knowledge transfer and training in Vietnam; 500+ resolved cases.",
+      "soil.cert.aws.ml": "AWS Certified Machine Learning – Specialty",
+      "soil.cert.aws.cp": "AWS Certified Cloud Practitioner",
+      "soil.cert.pmp": "Project Management Professional (PMP)",
+      "soil.cert.google": "Google Data Analytics",
       "about.eyebrow": "How I work",
       "about.title": "About",
       "about.p1":
