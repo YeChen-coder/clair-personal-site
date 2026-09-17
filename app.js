@@ -126,10 +126,10 @@
       "nav.soil": "背景",
       "nav.about": "关于",
       "nav.github": "GitHub",
-      "hero.eyebrow": "云端 · AI · 产品系统",
+      "hero.eyebrow": "云、AI，以及一些真的会出问题的东西",
       "hero.manifesto":
-        "我把 AI、云服务与现实设备接起来，也把它们做成可观察、可恢复、真正有人愿意用的系统。",
-      "hero.bio": "技术先以邀请的形态出现。真正重要的，是摘下之后会发生什么。",
+        "我是 Clair。平时会把 AI、云服务和各种现实设备接起来，做一些自己真的想用、也确实一直在用的东西。它们不一定非得聪明，但最好能在断网、重启和我懒得管它的时候，继续好好活着。",
+      "hero.bio": "人生是旷野，可是代码是沼泽。能用就用，不能用就改；请放过自己，去折磨 AI。",
       "hero.github": "浏览 GitHub",
       "hero.tree": "查看精选项目",
       "tree.eyebrow": "精选项目",
@@ -206,14 +206,14 @@
       "soil.cert.aws.cp": "AWS Certified Cloud Practitioner",
       "soil.cert.pmp": "Project Management Professional (PMP)",
       "soil.cert.google": "Google Data Analytics",
-      "about.eyebrow": "怎么干活",
-      "about.title": "关于",
+      "about.eyebrow": "一些不太正式的自我介绍",
+      "about.title": "关于我",
       "about.p1":
-        "我是 Clair Y.Chen。我的工作横跨云平台、AI 运行时、设备协议和产品交互。比起做一次能跑的 demo，我更在意系统在断网、重启、长时间运行和真实用户手里会怎样。",
+        "我是 Clair Y.Chen。之前做过 Azure 技术支持，后来又去读了工程硕士。现在做的东西跨度有点大：从云上的 Fargate、LLM Realtime，到蓝牙逆向、Windows 小工具和会自己说话的家用机器人。共同点倒是很简单——它们都来自我生活里某个已经烦到不能再装看不见的问题。",
       "about.p2":
-        "我习惯从亲身遇到的摩擦出发：先把问题变成可观察的系统，再用日志、测试和反馈把它收紧，直到它真的能进入日常生活。",
+        "我不太相信“做个 demo 就算完成”。东西第一次跑起来，通常只是麻烦的开始：断网会怎样，容器重启会怎样，日志够不够看，家里人会不会误触，成本会不会越跑越肉疼。就是这些不太光鲜的边边角角，反而最容易让我一直折腾下去。",
       "about.p3":
-        "我不把 AI 当魔法，也不回避它的诱惑。技术的价值与风险往往同时出现；我的选择是把边界、恢复路径和人工控制一起设计进去。",
+        "我也不太想把 AI 写成魔法。它很好用，也很诱人，甚至很容易让人误以为什么都已经变简单了。但一旦真的把它接进生活，边界、兜底和人工控制还是得有人认真想。反正我的原则一直没变：能用就用，不能用就改；放过自己，折磨 AI。",
       "about.cta": "在 GitHub 继续逛 →",
       "footer.note": "纯静态站点 · Cloudflare Workers / Pages",
       "panel.close": "关闭",
@@ -224,11 +224,11 @@
       "nav.soil": "Background",
       "nav.about": "About",
       "nav.github": "GitHub",
-      "hero.eyebrow": "Cloud · AI · Product Systems",
+      "hero.eyebrow": "Cloud, AI, and things that can actually break",
       "hero.manifesto":
-        "I connect AI and cloud services to the physical world — then make the result observable, resilient, and useful enough to live with.",
+        "I'm Clair. I connect AI and cloud services to real devices, mostly to build things I genuinely want to use and then keep using. They do not have to be clever. They do have to survive outages, restarts, and the days when I cannot be bothered to babysit them.",
       "hero.bio":
-        "Technology first appears as an invitation. What matters is what happens after we reach for it.",
+        "Life is a wilderness; code is a swamp. Use what works, change what doesn't—and please, let the AI suffer.",
       "hero.github": "Browse GitHub",
       "hero.tree": "View selected work",
       "tree.eyebrow": "Selected work",
@@ -308,14 +308,14 @@
       "soil.cert.aws.cp": "AWS Certified Cloud Practitioner",
       "soil.cert.pmp": "Project Management Professional (PMP)",
       "soil.cert.google": "Google Data Analytics",
-      "about.eyebrow": "How I work",
-      "about.title": "About",
+      "about.eyebrow": "A less formal introduction",
+      "about.title": "About me",
       "about.p1":
-        "I'm Clair Y.Chen. My work crosses cloud platforms, AI runtimes, device protocols, and product interaction. A demo that runs once is less interesting to me than what happens through outages, restarts, long sessions, and real use.",
+        "I'm Clair Y.Chen. I used to work in Azure support, then went back for a master's in engineering. These days my projects wander from Fargate and LLM Realtime to BLE reverse engineering, Windows utilities, and a home robot that talks. The common thread is less grand: each one started with something in my own life that had become too annoying to keep ignoring.",
       "about.p2":
-        "I start with friction I have actually felt: make the problem observable, then tighten the system with logs, tests, and feedback until it can enter everyday life.",
+        "I don't really believe a project is finished when the demo finally runs. That's usually when the awkward questions begin: what happens when the network drops, the container restarts, the logs are useless, someone at home taps the wrong button, or the cloud bill starts to hurt? Those unglamorous edges are where I tend to spend my time.",
       "about.p3":
-        "I do not treat AI as magic, and I do not ignore its pull. Value and risk usually arrive together; my response is to design boundaries, recovery paths, and human control into the system.",
+        "I don't think AI is magic, either. It is useful, persuasive, and very good at making everything look easier than it is. Once it is wired into real life, someone still has to think about boundaries, fallbacks, and the off switch. My rule is simple: use what works, change what doesn't—and let the AI suffer.",
       "about.cta": "Keep exploring on GitHub →",
       "footer.note": "Static site · Cloudflare Workers / Pages",
       "panel.close": "Close",

@@ -1192,8 +1192,8 @@ button:focus-visible,
 
 .hero-inner {
   width: 100%;
-  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.55fr);
-  gap: clamp(3rem, 9vw, 8rem);
+  grid-template-columns: minmax(0, 1.12fr) minmax(330px, 0.88fr);
+  gap: clamp(2.5rem, 7vw, 6rem);
 }
 
 .hero-text {
@@ -1214,8 +1214,8 @@ button:focus-visible,
 }
 
 .manifesto {
-  max-width: 44ch;
-  font-size: clamp(1.15rem, 2vw, 1.42rem);
+  max-width: 48ch;
+  font-size: clamp(1.08rem, 1.7vw, 1.28rem);
   font-weight: 450;
   line-height: 1.62;
 }
@@ -1253,7 +1253,7 @@ button:focus-visible,
 }
 
 .hero-visual {
-  width: min(100%, 270px);
+  width: min(100%, 390px);
 }
 
 .avatar-frame {
