@@ -332,12 +332,12 @@
   const treeStage = document.getElementById("treeStage");
   const fruits = document.querySelectorAll(".fruit");
 
-  let lang = "zh";
+  let lang = "en";
   let activeId = null;
   let hoverId = null;
 
   function t(key) {
-    const dict = strings[lang] || strings.zh;
+    const dict = strings[lang] || strings.en;
     return dict[key] != null ? dict[key] : key;
   }
 
@@ -349,12 +349,12 @@
   function getInitialLang() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "zh" || saved === "en") return saved;
-    return "zh";
+    return "en";
   }
 
   function applyLang(next) {
     lang = next;
-    const dict = strings[lang] || strings.zh;
+    const dict = strings[lang] || strings.en;
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
     document.querySelectorAll("[data-i18n]").forEach((el) => {
       const key = el.getAttribute("data-i18n");
