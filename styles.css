@@ -538,6 +538,76 @@ button:focus-visible,
   50% { transform: rotate(0.35deg); }
 }
 
+/* Behind-tree serpent — flat vector swim */
+.orchard-snake {
+  opacity: 0.95;
+}
+
+.snake-orbit {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: snake-cruise 22s linear infinite;
+}
+
+.snake-swimmer {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: snake-bob 3.8s ease-in-out infinite;
+}
+
+.snake-figure {
+  transform-box: fill-box;
+  transform-origin: 220px 42px;
+  animation: snake-sway 2.4s ease-in-out infinite;
+}
+
+@keyframes snake-cruise {
+  /* Lower canopy skirt + clear left/right peek around the trunk */
+  0% {
+    transform: translate(-260px, 470px) scale(1.35);
+  }
+  12% {
+    transform: translate(-40px, 430px) scale(1.4);
+  }
+  25% {
+    transform: translate(160px, 490px) scale(1.45);
+  }
+  38% {
+    transform: translate(340px, 440px) scale(1.5);
+  }
+  50% {
+    transform: translate(560px, 460px) scale(1.45);
+  }
+  50.01% {
+    transform: translate(560px, 460px) scaleX(-1.45) scaleY(1.45);
+  }
+  62% {
+    transform: translate(360px, 500px) scaleX(-1.5) scaleY(1.5);
+  }
+  75% {
+    transform: translate(140px, 430px) scaleX(-1.4) scaleY(1.4);
+  }
+  88% {
+    transform: translate(-60px, 480px) scaleX(-1.35) scaleY(1.35);
+  }
+  99.99% {
+    transform: translate(-260px, 470px) scaleX(-1.35) scaleY(1.35);
+  }
+  100% {
+    transform: translate(-260px, 470px) scale(1.35);
+  }
+}
+
+@keyframes snake-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+}
+
+@keyframes snake-sway {
+  0%, 100% { transform: rotate(-3deg) skewX(-2deg); }
+  50% { transform: rotate(3.5deg) skewX(2.5deg); }
+}
+
 @keyframes fruit-bob {
   0%, 100% { transform: rotate(-1.8deg) translateY(0); }
   50% { transform: rotate(1.8deg) translateY(2.5px); }
@@ -1095,8 +1165,15 @@ button:focus-visible,
 
   .ambience span,
   .fruit-sway,
-  .canopy-sway {
+  .canopy-sway,
+  .snake-orbit,
+  .snake-swimmer,
+  .snake-figure {
     animation: none !important;
+  }
+
+  .orchard-snake {
+    opacity: 0.45;
   }
 
   .fruit:hover .fruit-sway,
