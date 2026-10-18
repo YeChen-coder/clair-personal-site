@@ -4,8 +4,10 @@
  * and in front of it), slides out along the left limb into the leaves, pauses to
  * lift its head toward an apple and taste the air, then loops back and winds
  * down the trunk.
- * Every body point sits on the same track behind the head, so the body follows
- * exactly where the head has been, which is how a real snake moves.
+ * When someone picks an apple, it leaves the track and crawls over to that apple,
+ * stays while the apple is open, then finds its way back to the track.
+ * The body follows the trail the head leaves behind, so it goes exactly where
+ * the head has been, which is how a real snake moves.
  *
  * Coordinates are the tree SVG's 900×1100 viewBox. Depth (z) > 0 is in front
  * of the trunk; those parts are drawn in a layer above the trunk and branches.
@@ -166,6 +168,29 @@
     });
   }
 
+  // an open path resampled by arc length, for routes planned on the fly
+  const dist3 = (a, b) => Math.hypot(b.x - a.x, b.y - a.y, (b.z - a.z) * 0.6);
+  const makePath = (pts) => {
+    const cum = [0];
+    for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + dist3(pts[i - 1], pts[i]));
+    const length = cum.at(-1);
+    const pointAt = (s) => {
+      s = Math.max(0, Math.min(length, s));
+      let lo = 0;
+      let hi = cum.length - 1;
+      while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        if (cum[mid] <= s) lo = mid;
+        else hi = mid;
+      }
+      const a = pts[lo];
+      const b = pts[hi];
+      const t = (s - cum[lo]) / ((cum[hi] - cum[lo]) || 1);
+      return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t };
+    };
+    return { length, pointAt };
+  };
+
   // ---------- body ----------
   const LENGTH = 420;
   const SEGMENTS = 90;
@@ -266,6 +291,38 @@
   let DEFAULT_APPLE = { x: 318, y: 546 }; // replaced below by the apple nearest the turn
   const SPEED = 34; // viewBox units per second
   const PAUSE = 3.6;
+  const SEEK_SPEED = 78; // hurrying to an apple someone picked
+  const HOME_SPEED = 52;
+  const REJOIN = PAUSE_AT - 100; // where a trip home rejoins the loop: on the way out along the limb
+
+  // The body follows the trail the head leaves behind, so the head can take any route.
+  let trail = [];
+  for (let s = headS - LENGTH - 40; s <= headS; s += 1) trail.push(at(s));
+  const pushHead = (p) => {
+    if (dist3(trail.at(-1), p) < 0.4) return;
+    trail.push(p);
+    if (trail.length > 2600) trail = trail.slice(-1500);
+  };
+  // the point `back` units behind the head, along the trail
+  const behindHead = (back) => {
+    let acc = 0;
+    for (let i = trail.length - 1; i > 0; i--) {
+      const d = dist3(trail[i], trail[i - 1]);
+      if (acc + d >= back) {
+        const t = (back - acc) / (d || 1);
+        const a = trail[i];
+        const b = trail[i - 1];
+        return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t };
+      }
+      acc += d;
+    }
+    return { ...trail[0] };
+  };
+
+  let mode = "loop"; // loop -> seek -> hold -> home -> loop
+  let route = null;
+  let routeS = 0;
+  let chosen = null; // { node, x, y, r }: the apple it is going to or guarding
 
   const fruitPos = (node) => {
     const m = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)/.exec(node.getAttribute("transform") || "");
@@ -284,6 +341,117 @@
       }
     });
   }
+  const fruitRadius = (node) => {
+    const m = /scale\(\s*([\d.]+)/.exec(node.getAttribute("transform") || "");
+    return 25 * (m ? +m[1] : 1);
+  };
+
+  function routeToApple(apple) {
+    const h = trail.at(-1);
+    const back = behindHead(10);
+    const raw = [];
+    let from = h;
+    const onTrunk = Math.abs(Math.hypot(h.x - TRUNK_X, h.z) - RADIUS) < 4 && h.y > TOP_Y - 30;
+    if (onTrunk) {
+      // keep circling the way it was going, climbing, until it is in front of the trunk
+      const th0 = Math.atan2(h.z, h.x - TRUNK_X);
+      const thBack = Math.atan2(back.z, back.x - TRUNK_X);
+      let dth = th0 - thBack;
+      dth = ((dth + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+      const slope0 = Math.max(-35, Math.min(50, (h.y - back.y) / (Math.abs(dth) > 0.01 ? dth : 0.01)));
+      const turn = ((((Math.PI / 2 - th0) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) + 0.0001;
+      const steps = Math.ceil(turn * 30);
+      let yb = h.y - TILT * Math.sin(th0);
+      for (let i = 1; i <= steps; i++) {
+        const phi = (turn * i) / steps;
+        const slope = slope0 + (-31 - slope0) * Math.min(1, phi);
+        yb = Math.max(612, yb + (slope * turn) / steps);
+        const a = th0 + phi;
+        raw.push({ x: TRUNK_X + RADIUS * Math.cos(a), y: yb + TILT * Math.sin(a), z: RADIUS * Math.sin(a) });
+      }
+      from = raw.at(-1) || h;
+    }
+    // carry on in the direction it was already heading (straight up, if it just reached the trunk's front)
+    let dx = onTrunk ? 0 : from.x - back.x;
+    let dy = onTrunk ? -1 : from.y - back.y;
+    const dd = Math.hypot(dx, dy) || 1;
+    const ctrl = [from, { x: from.x + (dx / dd) * 22, y: from.y + (dy / dd) * 22 }];
+    // from the trunk it first climbs up into the crown
+    if (onTrunk && apple.y < from.y - 120) ctrl.push({ x: TRUNK_X, y: Math.min(from.y - 60, 590) });
+    // It stops just short of the apple on the side it comes from, facing it.
+    const base = ctrl.at(-1);
+    let ax = base.x - apple.x;
+    let ay = base.y - apple.y;
+    const ad = Math.hypot(ax, ay) || 1;
+    ax /= ad;
+    ay /= ad;
+    if (ay < -0.2) ay = -0.2; // never park right on top of an apple: come at it from the side
+    const an = Math.hypot(ax, ay) || 1;
+    ax /= an;
+    ay /= an;
+    const goal = { x: apple.x + ax * (apple.r + 16), y: apple.y + ay * (apple.r + 16) };
+    const pre = { x: goal.x + ax * 34, y: goal.y + ay * 34 };
+    // then meanders across the leaves in a loose S rather than a straight line
+    const ex = pre.x - base.x;
+    const ey = pre.y - base.y;
+    const el = Math.hypot(ex, ey) || 1;
+    const bends = Math.floor(el / 105);
+    let side = ex > 0 ? -1 : 1;
+    for (let i = 1; i <= bends; i++) {
+      const k = i / (bends + 1);
+      ctrl.push({ x: base.x + ex * k + (-ey / el) * 38 * side, y: base.y + ey * k + (ex / el) * 38 * side });
+      side = -side;
+    }
+    ctrl.push(pre, goal);
+    raw.push(...spline(ctrl, 14, 6, 84, from.z, 22).slice(1));
+    return makePath([h, ...raw]);
+  }
+
+  function routeHome() {
+    const h = trail.at(-1);
+    const back = behindHead(10);
+    const dx = h.x - back.x;
+    const dy = h.y - back.y;
+    const dd = Math.hypot(dx, dy) || 1;
+    const join = at(REJOIN);
+    const before = at(REJOIN - 34);
+    const ctrl = [
+      h,
+      { x: h.x + (dx / dd) * 20, y: h.y + (dy / dd) * 20 },
+      { x: (h.x + before.x) / 2 + 16, y: Math.max(h.y, before.y) - 10 },
+      before,
+      join,
+    ];
+    const raw = spline(ctrl, 14, 3, 70, h.z, 22);
+    raw[raw.length - 1].z = join.z;
+    return makePath([h, ...raw.slice(1)]);
+  }
+
+  function goTo(node) {
+    const p = fruitPos(node);
+    if (!p) return;
+    chosen = { node, x: p.x, y: p.y, r: fruitRadius(node) };
+    route = routeToApple(chosen);
+    routeS = 0;
+    pausedFor = 0;
+    mode = "seek";
+  }
+  function goHome() {
+    chosen = null;
+    route = routeHome();
+    routeS = 0;
+    mode = "home";
+  }
+  const fruitNodes = [...document.querySelectorAll(".fruit")];
+  const onSelection = () => {
+    if (reduceMotion) return;
+    const active = fruitNodes.find((n) => n.classList.contains("is-active"));
+    if (active && (!chosen || chosen.node !== active)) goTo(active);
+    else if (!active && chosen) goHome();
+  };
+  const watcher = new MutationObserver(onSelection);
+  fruitNodes.forEach((n) => watcher.observe(n, { attributes: true, attributeFilter: ["class"] }));
+
   document.querySelectorAll(".fruit").forEach((node) => {
     const look = () => {
       lookTarget = fruitPos(node);
@@ -299,14 +467,28 @@
   function draw() {
     // sample the body from head to tail
     const pts = [];
-    for (let i = 0; i <= SEGMENTS; i++) {
-      const u = i / SEGMENTS;
-      const p = at(headS - u * LENGTH);
-      p.u = u;
-      pts.push(p);
+    {
+      let i = trail.length - 1;
+      let acc = 0;
+      for (let k = 0; k <= SEGMENTS; k++) {
+        const want = (k / SEGMENTS) * LENGTH;
+        while (i > 0 && acc + dist3(trail[i], trail[i - 1]) < want) {
+          acc += dist3(trail[i], trail[i - 1]);
+          i--;
+        }
+        let p;
+        if (i > 0) {
+          const a = trail[i];
+          const b = trail[i - 1];
+          const t = (want - acc) / (dist3(a, b) || 1);
+          p = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t };
+        } else p = { ...trail[0] };
+        p.u = k / SEGMENTS;
+        pts.push(p);
+      }
     }
-    // reach toward the apple with the neck while paused at the branch tip
-    const target = lookTarget || DEFAULT_APPLE;
+    // reach toward the apple with the neck: at the branch tip, or at an apple someone picked
+    const target = chosen || lookTarget || DEFAULT_APPLE;
     if (lean > 0.001) {
       const h = pts[0];
       const dx = target.x - h.x;
@@ -487,26 +669,48 @@
 
   function step(dt) {
     clock += dt;
-    const toPause = (((PAUSE_AT - headS) % TRACK) + TRACK) % TRACK;
-    if (pausedFor > 0) {
-      pausedFor -= dt;
+    if (mode === "seek" || mode === "home") {
+      const left = route.length - routeS;
+      const top = mode === "seek" ? SEEK_SPEED : HOME_SPEED;
+      const v = top * Math.max(0.3, Math.min(1, left / 70, (routeS + 20) / 60));
+      routeS = Math.min(route.length, routeS + v * dt);
+      pushHead(route.pointAt(routeS));
+      lean = mode === "seek" && left < 50 ? Math.min(1, lean + dt * 1.5) : Math.max(0, lean - dt * 2);
+      if (routeS >= route.length) {
+        if (mode === "seek") {
+          mode = "hold";
+          flick.start = clock + 0.3;
+          nextFlick = clock + 1.8;
+        } else {
+          mode = "loop";
+          headS = REJOIN;
+        }
+      }
+    } else if (mode === "hold") {
       lean = Math.min(1, lean + dt * 1.4);
-      if (pausedFor < 0.9) lean = Math.max(0, pausedFor / 0.9);
     } else {
-      // ease into the stop at the branch tip
-      const slow = toPause < 60 ? 0.35 + 0.65 * (toPause / 60) : 1;
-      const move = SPEED * slow * dt;
-      if (toPause > 0 && toPause <= move) {
-        headS += toPause;
-        pausedFor = PAUSE;
-        flick.start = clock + 0.7;
-        nextFlick = clock + 2.2;
-      } else headS += move;
-      lean = Math.max(0, lean - dt * 2);
+      const toPause = (((PAUSE_AT - headS) % TRACK) + TRACK) % TRACK;
+      if (pausedFor > 0) {
+        pausedFor -= dt;
+        lean = Math.min(1, lean + dt * 1.4);
+        if (pausedFor < 0.9) lean = Math.max(0, pausedFor / 0.9);
+      } else {
+        // ease into the stop at the branch tip
+        const slow = toPause < 60 ? 0.35 + 0.65 * (toPause / 60) : 1;
+        const move = SPEED * slow * dt;
+        if (toPause > 0 && toPause <= move) {
+          headS += toPause;
+          pausedFor = PAUSE;
+          flick.start = clock + 0.7;
+          nextFlick = clock + 2.2;
+        } else headS += move;
+        lean = Math.max(0, lean - dt * 2);
+      }
+      pushHead(at(headS));
     }
     if (clock > nextFlick) {
       flick.start = clock;
-      nextFlick = clock + 2.6 + Math.random() * 3.2;
+      nextFlick = clock + (mode === "hold" ? 1.6 + Math.random() * 1.6 : 2.6 + Math.random() * 3.2);
     }
   }
 
