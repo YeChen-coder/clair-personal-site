@@ -36,4 +36,4 @@ python3 -m http.server 8765
 
 ## Deployment to Cloudflare
 
-Upload the folder contents—or deploy them directly with Wrangler Pages or Workers—to the `clair-chen` Worker. Keep `index.html`, `styles.css`, `app.js`, and `assets/` together.
+Upload the folder contents—or deploy them directly with Wrangler Pages or Workers—to the `clair-chen` Worker. Keep `index.html`, `styles.css`, `app.js`, `snake.js`, and `assets/` together.

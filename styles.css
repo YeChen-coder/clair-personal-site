@@ -538,74 +538,91 @@ button:focus-visible,
   50% { transform: rotate(0.35deg); }
 }
 
-/* Behind-tree serpent — flat vector swim */
+/* Serpent (geometry and motion in snake.js) */
 .orchard-snake {
-  opacity: 0.95;
+  pointer-events: none;
 }
 
-.snake-orbit {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: snake-cruise 22s linear infinite;
+.snake-body-path {
+  fill: #5f9140;
 }
 
-.snake-swimmer {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: snake-bob 3.8s ease-in-out infinite;
+.snake-shadow-path {
+  fill: #06100a;
+  opacity: 0.32;
 }
 
-.snake-figure {
-  transform-box: fill-box;
-  transform-origin: 220px 42px;
-  animation: snake-sway 2.4s ease-in-out infinite;
+.snake-belly-path {
+  fill: #40642e;
 }
 
-@keyframes snake-cruise {
-  /* Lower canopy skirt + clear left/right peek around the trunk */
-  0% {
-    transform: translate(-260px, 470px) scale(1.35);
-  }
-  12% {
-    transform: translate(-40px, 430px) scale(1.4);
-  }
-  25% {
-    transform: translate(160px, 490px) scale(1.45);
-  }
-  38% {
-    transform: translate(340px, 440px) scale(1.5);
-  }
-  50% {
-    transform: translate(560px, 460px) scale(1.45);
-  }
-  50.01% {
-    transform: translate(560px, 460px) scaleX(-1.45) scaleY(1.45);
-  }
-  62% {
-    transform: translate(360px, 500px) scaleX(-1.5) scaleY(1.5);
-  }
-  75% {
-    transform: translate(140px, 430px) scaleX(-1.4) scaleY(1.4);
-  }
-  88% {
-    transform: translate(-60px, 480px) scaleX(-1.35) scaleY(1.35);
-  }
-  99.99% {
-    transform: translate(-260px, 470px) scaleX(-1.35) scaleY(1.35);
-  }
-  100% {
-    transform: translate(-260px, 470px) scale(1.35);
-  }
+.snake-sheen-path {
+  fill: #8fb669;
 }
 
-@keyframes snake-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-18px); }
+.snake-mark {
+  fill: #23401e;
+  opacity: 0.62;
 }
 
-@keyframes snake-sway {
-  0%, 100% { transform: rotate(-3deg) skewX(-2deg); }
-  50% { transform: rotate(3.5deg) skewX(2.5deg); }
+.snake-fleck {
+  fill: #e6c463;
+  opacity: 0.9;
+}
+
+.snake-head-shape {
+  fill: #5f9140;
+}
+
+.snake-head-outline,
+.snake-brow {
+  fill: none;
+  stroke: #1f3318;
+  stroke-width: 0.8;
+  stroke-linecap: round;
+}
+
+.snake-brow {
+  stroke-width: 1.1;
+}
+
+.snake-head-mark {
+  fill: #e6c463;
+  opacity: 0.85;
+}
+
+.snake-jaw {
+  fill: none;
+  stroke: #24361b;
+  stroke-width: 0.8;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+.snake-eye {
+  fill: #f0cf62;
+  stroke: #1d2a15;
+  stroke-width: 0.7;
+}
+
+.snake-pupil {
+  fill: #0d130b;
+}
+
+.snake-glint {
+  fill: #fffaf0;
+  opacity: 0.9;
+}
+
+.snake-nostril {
+  fill: #1d2a15;
+}
+
+.snake-tongue {
+  fill: none;
+  stroke: #c8443a;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 @keyframes fruit-bob {
@@ -1165,15 +1182,8 @@ button:focus-visible,
 
   .ambience span,
   .fruit-sway,
-  .canopy-sway,
-  .snake-orbit,
-  .snake-swimmer,
-  .snake-figure {
+  .canopy-sway {
     animation: none !important;
-  }
-
-  .orchard-snake {
-    opacity: 0.45;
   }
 
   .fruit:hover .fruit-sway,

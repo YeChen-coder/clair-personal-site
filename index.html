@@ -179,96 +179,8 @@
               </g>
 
 
-              <!-- Behind-tree serpent: flat vector silhouette, swims under canopy -->
-              <g class="orchard-snake" aria-hidden="true" pointer-events="none">
-                <defs>
-                  <linearGradient id="snakeBodyGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#c8e6b0"/>
-                    <stop offset="45%" stop-color="#8fbf6e"/>
-                    <stop offset="100%" stop-color="#5a8a48"/>
-                  </linearGradient>
-                  <linearGradient id="snakeBellyGrad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stop-color="#e8d5a3" stop-opacity="0"/>
-                    <stop offset="35%" stop-color="#d4bc7a" stop-opacity="0.55"/>
-                    <stop offset="100%" stop-color="#c9ab6b" stop-opacity="0.15"/>
-                  </linearGradient>
-                  <filter id="snakeSoft" x="-20%" y="-40%" width="140%" height="180%">
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="2.2" result="b"/>
-                    <feOffset dy="3" result="o"/>
-                    <feFlood flood-color="#04100a" flood-opacity="0.35"/>
-                    <feComposite in2="o" operator="in"/>
-                    <feMerge>
-                      <feMergeNode/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                </defs>
-                <g class="snake-orbit">
-                  <g class="snake-swimmer" filter="url(#snakeSoft)">
-                    <!-- Elegant elongated serpent silhouette (custom vector, not 3D) -->
-                    <g class="snake-figure">
-                      <path class="snake-body" fill="url(#snakeBodyGrad)" opacity="1" d="
-                        M 12 42
-                        C 8 34, 14 26, 26 24
-                        C 42 21, 58 18, 78 22
-                        C 102 27, 118 38, 142 36
-                        C 168 34, 186 22, 212 20
-                        C 242 17, 268 28, 296 34
-                        C 324 40, 348 32, 372 26
-                        C 392 22, 410 24, 424 30
-                        C 436 36, 442 46, 436 54
-                        C 428 64, 408 68, 388 66
-                        C 360 63, 338 52, 312 48
-                        C 286 44, 262 54, 236 58
-                        C 208 62, 184 52, 158 48
-                        C 132 44, 110 54, 86 58
-                        C 64 62, 44 56, 30 50
-                        C 20 46, 14 46, 12 42
-                        Z
-                      ">
-                        <animate attributeName="d" dur="3.6s" repeatCount="indefinite" values="
-                          M 12 42 C 8 34, 14 26, 26 24 C 42 21, 58 18, 78 22 C 102 27, 118 38, 142 36 C 168 34, 186 22, 212 20 C 242 17, 268 28, 296 34 C 324 40, 348 32, 372 26 C 392 22, 410 24, 424 30 C 436 36, 442 46, 436 54 C 428 64, 408 68, 388 66 C 360 63, 338 52, 312 48 C 286 44, 262 54, 236 58 C 208 62, 184 52, 158 48 C 132 44, 110 54, 86 58 C 64 62, 44 56, 30 50 C 20 46, 14 46, 12 42 Z;
-                          M 12 38 C 6 30, 16 22, 28 20 C 46 16, 64 24, 84 30 C 108 38, 126 28, 150 24 C 176 19, 198 30, 224 36 C 252 43, 276 32, 302 26 C 328 20, 354 28, 378 34 C 398 39, 416 34, 428 28 C 438 24, 446 30, 444 40 C 442 52, 424 60, 404 58 C 376 55, 352 44, 326 40 C 298 35, 274 46, 248 52 C 220 58, 194 48, 168 42 C 142 36, 118 46, 94 52 C 72 57, 48 52, 32 46 C 22 42, 16 42, 12 38 Z;
-                          M 12 46 C 10 38, 18 30, 30 28 C 48 25, 66 16, 88 18 C 114 21, 132 34, 156 38 C 182 42, 204 30, 230 26 C 258 21, 284 32, 310 38 C 336 44, 360 36, 384 30 C 404 26, 422 30, 434 38 C 444 44, 446 54, 438 60 C 428 68, 406 70, 386 66 C 358 60, 336 50, 310 46 C 284 42, 260 52, 234 56 C 206 60, 182 50, 156 46 C 130 42, 108 52, 84 56 C 62 60, 42 54, 28 48 C 20 45, 14 48, 12 46 Z;
-                          M 12 42 C 8 34, 14 26, 26 24 C 42 21, 58 18, 78 22 C 102 27, 118 38, 142 36 C 168 34, 186 22, 212 20 C 242 17, 268 28, 296 34 C 324 40, 348 32, 372 26 C 392 22, 410 24, 424 30 C 436 36, 442 46, 436 54 C 428 64, 408 68, 388 66 C 360 63, 338 52, 312 48 C 286 44, 262 54, 236 58 C 208 62, 184 52, 158 48 C 132 44, 110 54, 86 58 C 64 62, 44 56, 30 50 C 20 46, 14 46, 12 42 Z
-                        "/>
-                      </path>
-                      <!-- belly stripe -->
-                      <path class="snake-belly" fill="url(#snakeBellyGrad)" d="
-                        M 40 40
-                        C 70 36, 110 44, 150 42
-                        C 190 40, 230 48, 270 46
-                        C 310 44, 350 38, 390 42
-                        C 410 44, 420 46, 418 48
-                        C 390 52, 350 48, 310 50
-                        C 270 52, 230 46, 190 48
-                        C 150 50, 110 44, 70 46
-                        C 52 47, 42 44, 40 40
-                        Z
-                      " opacity="0.7"/>
-                      <!-- head plate -->
-                      <ellipse cx="30" cy="36" rx="16" ry="11" fill="#8fad7c" opacity="0.55"/>
-                      <!-- eye -->
-                      <circle cx="24" cy="33" r="2.4" fill="#1a2218"/>
-                      <circle cx="23.2" cy="32.2" r="0.7" fill="#f5efd8" opacity="0.85"/>
-                      <!-- subtle scale chevrons along spine -->
-                      <g class="snake-scales" fill="none" stroke="#2f4534" stroke-width="1.1" stroke-linecap="round" opacity="0.28">
-                        <path d="M70 34 q8 6 16 0"/>
-                        <path d="M100 38 q8 6 16 0"/>
-                        <path d="M135 34 q8 6 16 0"/>
-                        <path d="M170 30 q8 6 16 0"/>
-                        <path d="M210 28 q8 6 16 0"/>
-                        <path d="M250 36 q8 6 16 0"/>
-                        <path d="M290 40 q8 6 16 0"/>
-                        <path d="M330 34 q8 6 16 0"/>
-                        <path d="M365 30 q8 6 16 0"/>
-                      </g>
-                      <!-- forked tongue, very subtle -->
-                      <path d="M14 40 L4 38 M14 40 L5 44" stroke="#c45a4a" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.55"/>
-                    </g>
-                  </g>
-                </g>
-              </g>
+              <!-- Serpent, drawn by snake.js: this layer passes behind the trunk -->
+              <g class="orchard-snake snake-back" aria-hidden="true" pointer-events="none"></g>
 
               <!-- Short elegant trunk — most mid trunk hidden by foliage curtains -->
               <g class="trunk-draw" aria-hidden="true">
@@ -2409,6 +2321,9 @@
             <circle cx="645" cy="109" r="2.2" fill="#fff8e0" opacity="0.40"/>
               </g>
 
+              <!-- Serpent, the parts in front of the trunk: above the leaves, below the apples -->
+              <g class="orchard-snake snake-front" aria-hidden="true" pointer-events="none"></g>
+
               <g class="falling-leaves" aria-hidden="true">
               <g class="falling-leaf" style="--fall-delay:0.0s; --fall-dur:12s;" transform="translate(820 597)">
                 <path d="M0,0 C-4.62,-2.71 -5.74,-9.96 0,-15.14 C5.74,-9.96 4.62,-2.71 0,0 Z" fill="#c6a15b" opacity="0.48" transform="rotate(-27)" filter="url(#leafGlow)"/>
@@ -2737,5 +2652,6 @@
 
   <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
   <script src="app.js" defer></script>
+  <script src="snake.js" defer></script>
 </body>
 </html>

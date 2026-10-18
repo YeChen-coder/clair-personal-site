@@ -9,7 +9,7 @@ The main experience is a **literal illustrated orchard tree** (inline SVG): orga
 ### Option A — Drag & drop
 
 1. Open [Cloudflare Pages](https://dash.cloudflare.com/) → **Workers & Pages** → **Create** → **Pages** → **Upload assets**.
-2. Upload the entire contents of this folder (`index.html`, `styles.css`, `app.js`, `assets/`, etc.).
+2. Upload the entire contents of this folder (`index.html`, `styles.css`, `app.js`, `snake.js`, `assets/`, etc.).
 3. Deploy. You get a `*.pages.dev` URL. No custom domain needed.
 
 ### Option B — Wrangler CLI

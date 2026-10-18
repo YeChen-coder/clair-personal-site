@@ -36,4 +36,4 @@ python3 -m http.server 8765
 
 ## 部署到 Cloudflare
 
-将文件夹内容上传到 `clair-chen` Worker，也可以使用 Wrangler Pages 或 Workers 直接上传。请将 `index.html`、`styles.css`、`app.js` 和 `assets/` 放在一起。
+将文件夹内容上传到 `clair-chen` Worker，也可以使用 Wrangler Pages 或 Workers 直接上传。请将 `index.html`、`styles.css`、`app.js`、`snake.js` 和 `assets/` 放在一起。
