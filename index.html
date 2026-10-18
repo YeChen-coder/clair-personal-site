@@ -66,7 +66,7 @@
         <header class="section-head orchard-head">
           <p class="eyebrow" data-i18n="tree.eyebrow">精选项目</p>
           <h2 id="orchard-heading" data-i18n="tree.title">选择一颗果实</h2>
-          <p class="section-lead" data-i18n="tree.lead">果实不按热闹程度排列，而按它能证明的能力生长：越靠近树冠，系统越复杂、落地越完整。</p>
+          <p class="section-lead" data-i18n="tree.lead">果子不按时间排，按它能证明多少本事排：越靠近树冠，系统越复杂、在真实生活里跑得越久。挨在一起的果子，是从同一根枝上长出来的。</p>
           <p class="orchard-hint" data-i18n="tree.hint">悬停看名称 · 点击查看工程细节</p>
         </header>
 
@@ -74,7 +74,7 @@
           <div class="tree-stage" id="treeStage">
             <svg class="tree-svg" viewBox="0 0 900 1100" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="tree-svg-title tree-svg-desc">
               <title id="tree-svg-title" data-i18n="tree.svgTitle">Clair 的项目果树</title>
-              <desc id="tree-svg-desc" data-i18n="tree.svgDesc">一棵暮色中的项目树，十一颗红色果实按工程复杂度与落地完成度分布在树冠和枝条之间。</desc>
+              <desc id="tree-svg-desc" data-i18n="tree.svgDesc">一棵暮色里的项目树，十二颗红苹果挂在树冠和枝条之间，越重要的越靠上；一条蛇在树后慢慢游。</desc>
               <defs>
                 <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stop-color="#c8d8c8"/>
@@ -2442,10 +2442,10 @@
               </g>
               </g>
 
-              <g class="fruit fruit-crown" data-id="specter" tabindex="0" role="button" aria-label="specter" transform="translate(448, 158)">
+              <g class="fruit fruit-crown" data-id="specter" tabindex="0" role="button" aria-label="specter" transform="translate(448, 158) scale(1.000)">
                 <g class="fruit-sway" style="--sway-dur: 5.4s; --sway-delay: -0.2s;">
-                  <path d="M-1.1199999999999999,-24.5 Q0.27999999999999997,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-                  <path d="M2.0999999999999996,-33.2 C11.2,-40.1 16.099999999999998,-30.1 9.799999999999999,-24.0 C6.3,-27.0 3.5,-30.1 2.0999999999999996,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
                   <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
                   <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleCrimson)" filter="url(#fruitGlow)"/>
                   <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleCrimson)" opacity="0.8"/>
@@ -2457,155 +2457,170 @@
                 </g>
               </g>
 
-              <g class="fruit" data-id="cloud" tabindex="0" role="button" aria-label="cloud" transform="translate(595, 220)">
-                <g class="fruit-sway" style="--sway-dur: 5.1s; --sway-delay: -1.7s;">
-                  <path d="M-0.8640000000000001,-18.7 Q0.21600000000000003,-25.6 1.08,-31.5" stroke="#3b2418" stroke-width="2.0" fill="none" stroke-linecap="round"/>
-                  <path d="M1.62,-25.6 C8.64,-30.9 12.420000000000002,-23.2 7.5600000000000005,-18.2 C4.86,-20.8 2.7,-23.2 1.62,-25.6Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -19.7)"/>
-                  <ellipse cx="2.2" cy="18.1" rx="16.7" ry="5.5" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
-                  <ellipse class="fruit-body" cx="0" cy="1.2" rx="18.6" ry="19.7" fill="url(#appleBlush)" filter="url(#fruitGlow)"/>
-                  <ellipse cx="0" cy="-2.4" rx="13.0" ry="9.8" fill="url(#appleBlush)" opacity="0.8"/>
-                  <ellipse cx="5.9" cy="2.4" rx="7.1" ry="8.3" fill="#6a120c" opacity="0.18"/>
-                  <ellipse cx="3.3" cy="7.5" rx="11.1" ry="9.4" fill="#1c1915" opacity="0.12"/>
-                  <ellipse cx="-6.3" cy="-4.3" rx="5.2" ry="4.3" fill="#fffaf0" opacity="0.22"/>
-                  <ellipse cx="0" cy="-10.2" rx="3.2" ry="1.9" fill="#2a1810" opacity="0.22"/>
-                  <circle class="fruit-hit" cx="0" cy="1.1" r="27.5" fill="transparent"/>
-                </g>
-              </g>
-
-              <g class="fruit" data-id="ebo" tabindex="0" role="button" aria-label="ebo" transform="translate(270, 242)">
+              <g class="fruit" data-id="ebo" tabindex="0" role="button" aria-label="ebo" transform="translate(282, 234) scale(0.772)">
                 <g class="fruit-sway" style="--sway-dur: 5.7s; --sway-delay: -1.8s;">
-                  <path d="M-0.8320000000000001,-17.9 Q0.20800000000000002,-24.6 1.04,-30.4" stroke="#3b2418" stroke-width="1.9" fill="none" stroke-linecap="round"/>
-                  <path d="M1.56,-24.6 C8.32,-29.8 11.96,-22.4 7.28,-17.4 C4.68,-20.1 2.6,-22.4 1.56,-24.6Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -18.9)"/>
-                  <ellipse cx="2.1" cy="17.4" rx="16.1" ry="5.3" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
-                  <ellipse class="fruit-body" cx="0" cy="1.1" rx="17.9" ry="18.9" fill="url(#appleCrimson)" filter="url(#fruitGlow)"/>
-                  <ellipse cx="0" cy="-2.3" rx="12.5" ry="9.5" fill="url(#appleCrimson)" opacity="0.8"/>
-                  <ellipse cx="5.7" cy="2.3" rx="6.8" ry="7.9" fill="#6a120c" opacity="0.18"/>
-                  <ellipse cx="3.2" cy="7.2" rx="10.7" ry="9.1" fill="#1c1915" opacity="0.12"/>
-                  <ellipse cx="-6.1" cy="-4.2" rx="5.0" ry="4.2" fill="#fffaf0" opacity="0.22"/>
-                  <ellipse cx="0" cy="-9.8" rx="3.1" ry="1.9" fill="#2a1810" opacity="0.22"/>
-                  <circle class="fruit-hit" cx="0" cy="1.0" r="26.5" fill="transparent"/>
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
+                  <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleCrimson)" filter="url(#fruitGlow)"/>
+                  <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleCrimson)" opacity="0.8"/>
+                  <ellipse cx="7.7" cy="3.1" rx="9.2" ry="10.7" fill="#6a120c" opacity="0.18"/>
+                  <ellipse cx="4.3" cy="9.7" rx="14.4" ry="12.2" fill="#1c1915" opacity="0.12"/>
+                  <ellipse cx="-8.2" cy="-5.6" rx="6.7" ry="5.6" fill="#fffaf0" opacity="0.22"/>
+                  <ellipse cx="0" cy="-13.2" rx="4.2" ry="2.5" fill="#2a1810" opacity="0.22"/>
+                  <circle class="fruit-hit" cx="0" cy="1.4" r="35.7" fill="transparent"/>
                 </g>
               </g>
 
-              <g class="fruit" data-id="resume" tabindex="0" role="button" aria-label="resume" transform="translate(700, 300)">
+              <g class="fruit" data-id="ebov3" tabindex="0" role="button" aria-label="ebov3" transform="translate(212, 292) scale(0.701)">
+                <g class="fruit-sway" style="--sway-dur: 5.2s; --sway-delay: -2.6s;">
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
+                  <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleBlush)" filter="url(#fruitGlow)"/>
+                  <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleBlush)" opacity="0.8"/>
+                  <ellipse cx="7.7" cy="3.1" rx="9.2" ry="10.7" fill="#6a120c" opacity="0.18"/>
+                  <ellipse cx="4.3" cy="9.7" rx="14.4" ry="12.2" fill="#1c1915" opacity="0.12"/>
+                  <ellipse cx="-8.2" cy="-5.6" rx="6.7" ry="5.6" fill="#fffaf0" opacity="0.22"/>
+                  <ellipse cx="0" cy="-13.2" rx="4.2" ry="2.5" fill="#2a1810" opacity="0.22"/>
+                  <circle class="fruit-hit" cx="0" cy="1.4" r="35.7" fill="transparent"/>
+                </g>
+              </g>
+
+              <g class="fruit" data-id="chem" tabindex="0" role="button" aria-label="chem" transform="translate(598, 220) scale(0.772)">
+                <g class="fruit-sway" style="--sway-dur: 5.1s; --sway-delay: -1.7s;">
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
+                  <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleBlush)" filter="url(#fruitGlow)"/>
+                  <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleBlush)" opacity="0.8"/>
+                  <ellipse cx="7.7" cy="3.1" rx="9.2" ry="10.7" fill="#6a120c" opacity="0.18"/>
+                  <ellipse cx="4.3" cy="9.7" rx="14.4" ry="12.2" fill="#1c1915" opacity="0.12"/>
+                  <ellipse cx="-8.2" cy="-5.6" rx="6.7" ry="5.6" fill="#fffaf0" opacity="0.22"/>
+                  <ellipse cx="0" cy="-13.2" rx="4.2" ry="2.5" fill="#2a1810" opacity="0.22"/>
+                  <circle class="fruit-hit" cx="0" cy="1.4" r="35.7" fill="transparent"/>
+                </g>
+              </g>
+
+              <g class="fruit" data-id="resume" tabindex="0" role="button" aria-label="resume" transform="translate(702, 300) scale(0.701)">
                 <g class="fruit-sway" style="--sway-dur: 5.3s; --sway-delay: -0.7s;">
-                  <path d="M-0.784,-16.8 Q0.196,-23.2 0.98,-28.6" stroke="#3b2418" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-                  <path d="M1.47,-23.2 C7.84,-28.1 11.27,-21.1 6.859999999999999,-16.3 C4.41,-18.9 2.45,-21.1 1.47,-23.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -17.8)"/>
-                  <ellipse cx="2.0" cy="16.4" rx="15.2" ry="5.0" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
-                  <ellipse class="fruit-body" cx="0" cy="1.1" rx="16.9" ry="17.8" fill="url(#appleBlush)" filter="url(#fruitGlow)"/>
-                  <ellipse cx="0" cy="-2.1" rx="11.8" ry="8.9" fill="url(#appleBlush)" opacity="0.8"/>
-                  <ellipse cx="5.4" cy="2.1" rx="6.4" ry="7.5" fill="#6a120c" opacity="0.18"/>
-                  <ellipse cx="3.0" cy="6.8" rx="10.1" ry="8.6" fill="#1c1915" opacity="0.12"/>
-                  <ellipse cx="-5.7" cy="-3.9" rx="4.7" ry="3.9" fill="#fffaf0" opacity="0.22"/>
-                  <ellipse cx="0" cy="-9.3" rx="2.9" ry="1.8" fill="#2a1810" opacity="0.22"/>
-                  <circle class="fruit-hit" cx="0" cy="1.0" r="25.0" fill="transparent"/>
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
+                  <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleCrimson)" filter="url(#fruitGlow)"/>
+                  <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleCrimson)" opacity="0.8"/>
+                  <ellipse cx="7.7" cy="3.1" rx="9.2" ry="10.7" fill="#6a120c" opacity="0.18"/>
+                  <ellipse cx="4.3" cy="9.7" rx="14.4" ry="12.2" fill="#1c1915" opacity="0.12"/>
+                  <ellipse cx="-8.2" cy="-5.6" rx="6.7" ry="5.6" fill="#fffaf0" opacity="0.22"/>
+                  <ellipse cx="0" cy="-13.2" rx="4.2" ry="2.5" fill="#2a1810" opacity="0.22"/>
+                  <circle class="fruit-hit" cx="0" cy="1.4" r="35.7" fill="transparent"/>
                 </g>
               </g>
 
-              <g class="fruit" data-id="bionic" tabindex="0" role="button" aria-label="bionic" transform="translate(170, 340)">
+              <g class="fruit" data-id="bionic" tabindex="0" role="button" aria-label="bionic" transform="translate(592, 326) scale(0.701)">
                 <g class="fruit-sway" style="--sway-dur: 5.4s; --sway-delay: -0.8s;">
-                  <path d="M-0.784,-16.8 Q0.196,-23.2 0.98,-28.6" stroke="#3b2418" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-                  <path d="M1.47,-23.2 C7.84,-28.1 11.27,-21.1 6.859999999999999,-16.3 C4.41,-18.9 2.45,-21.1 1.47,-23.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(-26 0 -17.8)"/>
-                  <ellipse cx="2.0" cy="16.4" rx="15.2" ry="5.0" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
-                  <ellipse class="fruit-body" cx="0" cy="1.1" rx="16.9" ry="17.8" fill="url(#appleCrimson)" filter="url(#fruitGlow)"/>
-                  <ellipse cx="0" cy="-2.1" rx="11.8" ry="8.9" fill="url(#appleCrimson)" opacity="0.8"/>
-                  <ellipse cx="5.4" cy="2.1" rx="6.4" ry="7.5" fill="#6a120c" opacity="0.18"/>
-                  <ellipse cx="3.0" cy="6.8" rx="10.1" ry="8.6" fill="#1c1915" opacity="0.12"/>
-                  <ellipse cx="-5.7" cy="-3.9" rx="4.7" ry="3.9" fill="#fffaf0" opacity="0.22"/>
-                  <ellipse cx="0" cy="-9.3" rx="2.9" ry="1.8" fill="#2a1810" opacity="0.22"/>
-                  <circle class="fruit-hit" cx="0" cy="1.0" r="25.0" fill="transparent"/>
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
+                  <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleHoney)" filter="url(#fruitGlow)"/>
+                  <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleHoney)" opacity="0.8"/>
+                  <ellipse cx="7.7" cy="3.1" rx="9.2" ry="10.7" fill="#6a120c" opacity="0.18"/>
+                  <ellipse cx="4.3" cy="9.7" rx="14.4" ry="12.2" fill="#1c1915" opacity="0.12"/>
+                  <ellipse cx="-8.2" cy="-5.6" rx="6.7" ry="5.6" fill="#fffaf0" opacity="0.22"/>
+                  <ellipse cx="0" cy="-13.2" rx="4.2" ry="2.5" fill="#2a1810" opacity="0.22"/>
+                  <circle class="fruit-hit" cx="0" cy="1.4" r="35.7" fill="transparent"/>
                 </g>
               </g>
 
-              <g class="fruit" data-id="windows" tabindex="0" role="button" aria-label="windows" transform="translate(535, 365)">
+              <g class="fruit" data-id="focus" tabindex="0" role="button" aria-label="focus" transform="translate(528, 388) scale(0.656)">
                 <g class="fruit-sway" style="--sway-dur: 4.8s; --sway-delay: -0.3s;">
-                  <path d="M-0.7360000000000001,-15.7 Q0.18400000000000002,-21.8 0.92,-26.9" stroke="#3b2418" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-                  <path d="M1.3800000000000001,-21.8 C7.36,-26.4 10.58,-19.8 6.44,-15.2 C4.140000000000001,-17.8 2.3000000000000003,-19.8 1.3800000000000001,-21.8Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -16.7)"/>
-                  <ellipse cx="1.8" cy="15.4" rx="14.2" ry="4.7" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
-                  <ellipse class="fruit-body" cx="0" cy="1.0" rx="15.8" ry="16.7" fill="url(#appleHoney)" filter="url(#fruitGlow)"/>
-                  <ellipse cx="0" cy="-2.0" rx="11.1" ry="8.4" fill="url(#appleHoney)" opacity="0.8"/>
-                  <ellipse cx="5.1" cy="2.0" rx="6.0" ry="7.0" fill="#6a120c" opacity="0.18"/>
-                  <ellipse cx="2.8" cy="6.4" rx="9.5" ry="8.0" fill="#1c1915" opacity="0.12"/>
-                  <ellipse cx="-5.4" cy="-3.7" rx="4.4" ry="3.7" fill="#fffaf0" opacity="0.22"/>
-                  <ellipse cx="0" cy="-8.7" rx="2.8" ry="1.7" fill="#2a1810" opacity="0.22"/>
-                  <circle class="fruit-hit" cx="0" cy="0.9" r="23.4" fill="transparent"/>
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
+                  <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleBlush)" filter="url(#fruitGlow)"/>
+                  <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleBlush)" opacity="0.8"/>
+                  <ellipse cx="7.7" cy="3.1" rx="9.2" ry="10.7" fill="#6a120c" opacity="0.18"/>
+                  <ellipse cx="4.3" cy="9.7" rx="14.4" ry="12.2" fill="#1c1915" opacity="0.12"/>
+                  <ellipse cx="-8.2" cy="-5.6" rx="6.7" ry="5.6" fill="#fffaf0" opacity="0.22"/>
+                  <ellipse cx="0" cy="-13.2" rx="4.2" ry="2.5" fill="#2a1810" opacity="0.22"/>
+                  <circle class="fruit-hit" cx="0" cy="1.4" r="35.7" fill="transparent"/>
                 </g>
               </g>
 
-              <g class="fruit" data-id="foci" tabindex="0" role="button" aria-label="foci" transform="translate(305, 410)">
-                <g class="fruit-sway" style="--sway-dur: 5.3s; --sway-delay: -4.0s;">
-                  <path d="M-0.7360000000000001,-15.7 Q0.18400000000000002,-21.8 0.92,-26.9" stroke="#3b2418" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-                  <path d="M1.3800000000000001,-21.8 C7.36,-26.4 10.58,-19.8 6.44,-15.2 C4.140000000000001,-17.8 2.3000000000000003,-19.8 1.3800000000000001,-21.8Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -16.7)"/>
-                  <ellipse cx="1.8" cy="15.4" rx="14.2" ry="4.7" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
-                  <ellipse class="fruit-body" cx="0" cy="1.0" rx="15.8" ry="16.7" fill="url(#appleBlush)" filter="url(#fruitGlow)"/>
-                  <ellipse cx="0" cy="-2.0" rx="11.1" ry="8.4" fill="url(#appleBlush)" opacity="0.8"/>
-                  <ellipse cx="5.1" cy="2.0" rx="6.0" ry="7.0" fill="#6a120c" opacity="0.18"/>
-                  <ellipse cx="2.8" cy="6.4" rx="9.5" ry="8.0" fill="#1c1915" opacity="0.12"/>
-                  <ellipse cx="-5.4" cy="-3.7" rx="4.4" ry="3.7" fill="#fffaf0" opacity="0.22"/>
-                  <ellipse cx="0" cy="-8.7" rx="2.8" ry="1.7" fill="#2a1810" opacity="0.22"/>
-                  <circle class="fruit-hit" cx="0" cy="0.9" r="23.4" fill="transparent"/>
+              <g class="fruit" data-id="reverse" tabindex="0" role="button" aria-label="reverse" transform="translate(312, 404) scale(0.656)">
+                <g class="fruit-sway" style="--sway-dur: 5.3s; --sway-delay: -4s;">
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
+                  <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleHoney)" filter="url(#fruitGlow)"/>
+                  <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleHoney)" opacity="0.8"/>
+                  <ellipse cx="7.7" cy="3.1" rx="9.2" ry="10.7" fill="#6a120c" opacity="0.18"/>
+                  <ellipse cx="4.3" cy="9.7" rx="14.4" ry="12.2" fill="#1c1915" opacity="0.12"/>
+                  <ellipse cx="-8.2" cy="-5.6" rx="6.7" ry="5.6" fill="#fffaf0" opacity="0.22"/>
+                  <ellipse cx="0" cy="-13.2" rx="4.2" ry="2.5" fill="#2a1810" opacity="0.22"/>
+                  <circle class="fruit-hit" cx="0" cy="1.4" r="35.7" fill="transparent"/>
                 </g>
               </g>
 
-              <g class="fruit" data-id="speaking" tabindex="0" role="button" aria-label="speaking" transform="translate(650, 495)">
+              <g class="fruit" data-id="pte" tabindex="0" role="button" aria-label="pte" transform="translate(650, 495) scale(0.614)">
                 <g class="fruit-sway" style="--sway-dur: 5.6s; --sway-delay: -2.9s;">
-                  <path d="M-0.6880000000000001,-14.7 Q0.17200000000000001,-20.4 0.86,-25.1" stroke="#3b2418" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-                  <path d="M1.29,-20.4 C6.88,-24.6 9.89,-18.5 6.02,-14.2 C3.87,-16.6 2.15,-18.5 1.29,-20.4Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -15.7)"/>
-                  <ellipse cx="1.7" cy="14.4" rx="13.3" ry="4.4" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
-                  <ellipse class="fruit-body" cx="0" cy="0.9" rx="14.8" ry="15.7" fill="url(#appleCrimson)" filter="url(#fruitGlow)"/>
-                  <ellipse cx="0" cy="-1.9" rx="10.4" ry="7.8" fill="url(#appleCrimson)" opacity="0.8"/>
-                  <ellipse cx="4.7" cy="1.9" rx="5.6" ry="6.6" fill="#6a120c" opacity="0.18"/>
-                  <ellipse cx="2.7" cy="5.9" rx="8.9" ry="7.5" fill="#1c1915" opacity="0.12"/>
-                  <ellipse cx="-5.0" cy="-3.4" rx="4.1" ry="3.4" fill="#fffaf0" opacity="0.22"/>
-                  <ellipse cx="0" cy="-8.1" rx="2.6" ry="1.5" fill="#2a1810" opacity="0.22"/>
-                  <circle class="fruit-hit" cx="0" cy="0.9" r="21.9" fill="transparent"/>
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
+                  <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleCrimson)" filter="url(#fruitGlow)"/>
+                  <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleCrimson)" opacity="0.8"/>
+                  <ellipse cx="7.7" cy="3.1" rx="9.2" ry="10.7" fill="#6a120c" opacity="0.18"/>
+                  <ellipse cx="4.3" cy="9.7" rx="14.4" ry="12.2" fill="#1c1915" opacity="0.12"/>
+                  <ellipse cx="-8.2" cy="-5.6" rx="6.7" ry="5.6" fill="#fffaf0" opacity="0.22"/>
+                  <ellipse cx="0" cy="-13.2" rx="4.2" ry="2.5" fill="#2a1810" opacity="0.22"/>
+                  <circle class="fruit-hit" cx="0" cy="1.4" r="35.7" fill="transparent"/>
                 </g>
               </g>
 
-              <g class="fruit" data-id="desk" tabindex="0" role="button" aria-label="desk" transform="translate(230, 610)">
-                <g class="fruit-sway" style="--sway-dur: 5.0s; --sway-delay: -3.1s;">
-                  <path d="M-0.6400000000000001,-13.6 Q0.16000000000000003,-19.0 0.8,-23.4" stroke="#3b2418" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-                  <path d="M1.2000000000000002,-19.0 C6.4,-22.9 9.200000000000001,-17.2 5.6000000000000005,-13.1 C3.6,-15.4 2.0,-17.2 1.2000000000000002,-19.0Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -14.6)"/>
-                  <ellipse cx="1.6" cy="13.4" rx="12.4" ry="4.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
-                  <ellipse class="fruit-body" cx="0" cy="0.9" rx="13.8" ry="14.6" fill="url(#appleHoney)" filter="url(#fruitGlow)"/>
-                  <ellipse cx="0" cy="-1.7" rx="9.6" ry="7.3" fill="url(#appleHoney)" opacity="0.8"/>
-                  <ellipse cx="4.4" cy="1.7" rx="5.2" ry="6.1" fill="#6a120c" opacity="0.18"/>
-                  <ellipse cx="2.5" cy="5.5" rx="8.3" ry="7.0" fill="#1c1915" opacity="0.12"/>
-                  <ellipse cx="-4.7" cy="-3.2" rx="3.9" ry="3.2" fill="#fffaf0" opacity="0.22"/>
-                  <ellipse cx="0" cy="-7.6" rx="2.4" ry="1.4" fill="#2a1810" opacity="0.22"/>
-                  <circle class="fruit-hit" cx="0" cy="0.8" r="20.4" fill="transparent"/>
+              <g class="fruit" data-id="desk" tabindex="0" role="button" aria-label="desk" transform="translate(230, 610) scale(0.573)">
+                <g class="fruit-sway" style="--sway-dur: 5s; --sway-delay: -3.1s;">
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
+                  <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleHoney)" filter="url(#fruitGlow)"/>
+                  <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleHoney)" opacity="0.8"/>
+                  <ellipse cx="7.7" cy="3.1" rx="9.2" ry="10.7" fill="#6a120c" opacity="0.18"/>
+                  <ellipse cx="4.3" cy="9.7" rx="14.4" ry="12.2" fill="#1c1915" opacity="0.12"/>
+                  <ellipse cx="-8.2" cy="-5.6" rx="6.7" ry="5.6" fill="#fffaf0" opacity="0.22"/>
+                  <ellipse cx="0" cy="-13.2" rx="4.2" ry="2.5" fill="#2a1810" opacity="0.22"/>
+                  <circle class="fruit-hit" cx="0" cy="1.4" r="35.7" fill="transparent"/>
                 </g>
               </g>
 
-              <g class="fruit" data-id="rccar" tabindex="0" role="button" aria-label="rccar" transform="translate(610, 670)">
+              <g class="fruit" data-id="rccar" tabindex="0" role="button" aria-label="rccar" transform="translate(610, 670) scale(0.573)">
                 <g class="fruit-sway" style="--sway-dur: 5.7s; --sway-delay: -0.7s;">
-                  <path d="M-0.6400000000000001,-13.6 Q0.16000000000000003,-19.0 0.8,-23.4" stroke="#3b2418" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-                  <path d="M1.2000000000000002,-19.0 C6.4,-22.9 9.200000000000001,-17.2 5.6000000000000005,-13.1 C3.6,-15.4 2.0,-17.2 1.2000000000000002,-19.0Z" fill="#5a8f6a" opacity="0.9" transform="rotate(-26 0 -14.6)"/>
-                  <ellipse cx="1.6" cy="13.4" rx="12.4" ry="4.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
-                  <ellipse class="fruit-body" cx="0" cy="0.9" rx="13.8" ry="14.6" fill="url(#appleBlush)" filter="url(#fruitGlow)"/>
-                  <ellipse cx="0" cy="-1.7" rx="9.6" ry="7.3" fill="url(#appleBlush)" opacity="0.8"/>
-                  <ellipse cx="4.4" cy="1.7" rx="5.2" ry="6.1" fill="#6a120c" opacity="0.18"/>
-                  <ellipse cx="2.5" cy="5.5" rx="8.3" ry="7.0" fill="#1c1915" opacity="0.12"/>
-                  <ellipse cx="-4.7" cy="-3.2" rx="3.9" ry="3.2" fill="#fffaf0" opacity="0.22"/>
-                  <ellipse cx="0" cy="-7.6" rx="2.4" ry="1.4" fill="#2a1810" opacity="0.22"/>
-                  <circle class="fruit-hit" cx="0" cy="0.8" r="20.4" fill="transparent"/>
-                </g>
-              </g>
-              <g class="fruit" data-id="animatch" tabindex="0" role="button" aria-label="animatch" transform="translate(390, 748) scale(0.88)">
-                <g class="fruit-sway" style="--sway-dur: 5.2s; --sway-delay: -1.4s;">
-                  <path d="M-0.6400000000000001,-13.6 Q0.16000000000000003,-19.0 0.8,-23.4" stroke="#3b2418" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-                  <path d="M1.2000000000000002,-19.0 C6.4,-22.9 9.200000000000001,-17.2 5.6000000000000005,-13.1 C3.6,-15.4 2.0,-17.2 1.2000000000000002,-19.0Z" fill="#5a8f6a" opacity="0.9" transform="rotate(18 0 -14.6)"/>
-                  <ellipse cx="1.6" cy="13.4" rx="12.4" ry="4.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
-                  <ellipse class="fruit-body" cx="0" cy="0.9" rx="13.8" ry="14.6" fill="url(#appleHoney)" filter="url(#fruitGlow)"/>
-                  <ellipse cx="0" cy="-1.7" rx="9.6" ry="7.3" fill="url(#appleHoney)" opacity="0.8"/>
-                  <ellipse cx="4.4" cy="1.7" rx="5.2" ry="6.1" fill="#6a120c" opacity="0.18"/>
-                  <ellipse cx="2.5" cy="5.5" rx="8.3" ry="7.0" fill="#1c1915" opacity="0.12"/>
-                  <ellipse cx="-4.7" cy="-3.2" rx="3.9" ry="3.2" fill="#fffaf0" opacity="0.22"/>
-                  <ellipse cx="0" cy="-7.6" rx="2.4" ry="1.4" fill="#2a1810" opacity="0.22"/>
-                  <circle class="fruit-hit" cx="0" cy="0.8" r="20.4" fill="transparent"/>
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
+                  <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleBlush)" filter="url(#fruitGlow)"/>
+                  <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleBlush)" opacity="0.8"/>
+                  <ellipse cx="7.7" cy="3.1" rx="9.2" ry="10.7" fill="#6a120c" opacity="0.18"/>
+                  <ellipse cx="4.3" cy="9.7" rx="14.4" ry="12.2" fill="#1c1915" opacity="0.12"/>
+                  <ellipse cx="-8.2" cy="-5.6" rx="6.7" ry="5.6" fill="#fffaf0" opacity="0.22"/>
+                  <ellipse cx="0" cy="-13.2" rx="4.2" ry="2.5" fill="#2a1810" opacity="0.22"/>
+                  <circle class="fruit-hit" cx="0" cy="1.4" r="35.7" fill="transparent"/>
                 </g>
               </g>
 
+              <g class="fruit" data-id="animatch" tabindex="0" role="button" aria-label="animatch" transform="translate(390, 748) scale(0.502)">
+                <g class="fruit-sway" style="--sway-dur: 5.2s; --sway-delay: -1.4s;">
+                  <path d="M-1.12,-24.5 Q0.28,-33.2 1.4,-40.9" stroke="#3b2418" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+                  <path d="M2.1,-33.2 C11.2,-40.1 16.1,-30.1 9.8,-24.0 C6.3,-27.0 3.5,-30.1 2.1,-33.2Z" fill="#5a8f6a" opacity="0.9" transform="rotate(30 0 -25.5)"/>
+                  <ellipse cx="2.8" cy="23.4" rx="21.7" ry="7.1" fill="#1c1915" opacity="0.22" filter="url(#blurSoft)"/>
+                  <ellipse class="fruit-body" cx="0" cy="1.5" rx="24.1" ry="25.5" fill="url(#appleHoney)" filter="url(#fruitGlow)"/>
+                  <ellipse cx="0" cy="-3.1" rx="16.9" ry="12.7" fill="url(#appleHoney)" opacity="0.8"/>
+                  <ellipse cx="7.7" cy="3.1" rx="9.2" ry="10.7" fill="#6a120c" opacity="0.18"/>
+                  <ellipse cx="4.3" cy="9.7" rx="14.4" ry="12.2" fill="#1c1915" opacity="0.12"/>
+                  <ellipse cx="-8.2" cy="-5.6" rx="6.7" ry="5.6" fill="#fffaf0" opacity="0.22"/>
+                  <ellipse cx="0" cy="-13.2" rx="4.2" ry="2.5" fill="#2a1810" opacity="0.22"/>
+                  <circle class="fruit-hit" cx="0" cy="1.4" r="35.7" fill="transparent"/>
+                </g>
+              </g>
             </svg>
 
             <div class="fruit-tooltip" id="fruitTooltip" hidden>
@@ -2640,7 +2655,7 @@
         <header class="section-head soil-head">
           <p class="eyebrow" data-i18n="soil.eyebrow">经历与基础</p>
           <h2 id="soil-heading" data-i18n="soil.title">根系</h2>
-          <p class="section-lead" data-i18n="soil.lead">把项目做深的，不只有技术栈：还有云端排障、跨平台支持、工程教育与持续学习。</p>
+          <p class="section-lead" data-i18n="soil.lead">树上没挂出来的那部分我：在 Azure 做了三年多技术支持，后来回学校读了工程硕士，中间顺手考了几张证。</p>
         </header>
         <div class="roots reveal">
           <article class="root-group">
