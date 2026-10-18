@@ -1465,19 +1465,6 @@ button:focus-visible,
   opacity: 0.58;
 }
 
-#appleCrimson stop:nth-child(1),
-#appleBlush stop:nth-child(1),
-#appleHoney stop:nth-child(1) { stop-color: #ff9b82; }
-#appleCrimson stop:nth-child(2),
-#appleBlush stop:nth-child(2),
-#appleHoney stop:nth-child(2) { stop-color: #e44f3d; }
-#appleCrimson stop:nth-child(3),
-#appleBlush stop:nth-child(3),
-#appleHoney stop:nth-child(3) { stop-color: #a91f1d; }
-#appleCrimson stop:last-child,
-#appleBlush stop:last-child,
-#appleHoney stop:last-child { stop-color: #350706; }
-
 .fruit {
   filter: saturate(1.15) brightness(1.08);
 }

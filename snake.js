@@ -1,8 +1,9 @@
 /* The serpent in the orchard.
  *
  * The snake follows a fixed closed track: it coils up the trunk (passing behind
- * and in front of it), slides out along the lower-left branch, pauses to lean
- * toward an apple and taste the air, then loops back and winds down the trunk.
+ * and in front of it), slides out along the left limb into the leaves, pauses to
+ * lift its head toward an apple and taste the air, then loops back and winds
+ * down the trunk.
  * Every body point sits on the same track behind the head, so the body follows
  * exactly where the head has been, which is how a real snake moves.
  *
@@ -19,8 +20,12 @@
   const TRUNK_X = 469;
   const RADIUS = 52; // coil radius around the trunk
   const TILT = 3; // vertical half-height of a coil seen in perspective
-  const TOP_Y = 546; // where the coil meets the branch
-  const BOTTOM_Y = 860;
+  const TOP_Y = 676; // where the coil meets the left limb
+  const BOTTOM_Y = 915;
+  // The left limb as drawn in the tree (centreline and width at each end).
+  const LIMB = [[455, 700], [420, 690], [370, 650], [330, 600]];
+  const LIMB_W = [34, 13];
+  const BODY_HALF = 11;
 
   const helix = (fromAngle, toAngle, fromY, toY, steps) => {
     const pts = [];
@@ -73,46 +78,53 @@
   };
 
   const LEFT = TRUNK_X - RADIUS;
+  // a point beside the limb: side +1 rides on top of it, −1 hangs underneath
+  const besideLimb = (t, side) => {
+    const B = (q) => {
+      const u = 1 - q;
+      return [0, 1].map((k) =>
+        u * u * u * LIMB[0][k] + 3 * u * u * q * LIMB[1][k] + 3 * u * q * q * LIMB[2][k] + q * q * q * LIMB[3][k]
+      );
+    };
+    const [x, y] = B(t);
+    const [ax, ay] = B(Math.max(0, t - 0.01));
+    const [bx, by] = B(Math.min(1, t + 0.01));
+    let nx = -(by - ay);
+    let ny = bx - ax;
+    const d = Math.hypot(nx, ny) || 1;
+    nx /= d;
+    ny /= d;
+    if (ny > 0) {
+      nx = -nx;
+      ny = -ny;
+    }
+    const half = (LIMB_W[0] + (LIMB_W[1] - LIMB_W[0]) * Math.pow(t, 0.85)) / 2;
+    const off = (half + BODY_HALF - 1) * side;
+    return { x: x + nx * off, y: y + ny * off };
+  };
+  const tip = besideLimb(1, 0);
   const raw = [
-    // Up the trunk: from behind it at the bottom, 1¾ turns, ending at its left side.
+    // Up the trunk: from the front at the bottom, 1¼ turns, ending at its left side.
     // The coils must climb steeply enough that, seen from the front, the body
     // never bends more tightly than its own width at the trunk's sides.
-    ...helix(Math.PI * 1.5, Math.PI * 5, BOTTOM_Y, TOP_Y, 200),
-    // out along the top of the branch
+    ...helix(Math.PI / 2, Math.PI * 3, BOTTOM_Y, TOP_Y, 160),
+    // up along the top of the left limb, into the leaves
+    ...spline([{ x: LEFT, y: TOP_Y }, ...[0.4, 0.6, 0.8, 1].map((t) => besideLimb(t, 1))], 16, 3.5, 62, 0, 22).slice(1),
+    // the turn among the leaves, where it stops below the apple
     ...spline(
       [
-        { x: LEFT, y: TOP_Y },
-        { x: 396, y: 520 },
-        { x: 344, y: 511 },
-        { x: 292, y: 511 },
-        { x: 252, y: 518 },
-      ],
-      16, 3.5, 62, 0, 22
-    ).slice(1),
-    // the turn at the end of the branch, where it stops to look at the apple
-    ...spline(
-      [
-        { x: 252, y: 518 },
-        { x: 228, y: 523 },
-        { x: 216, y: 538 },
-        { x: 230, y: 554 },
-        { x: 258, y: 557 },
+        besideLimb(1, 1),
+        { x: tip.x - 14, y: tip.y - 14 },
+        { x: tip.x - 22, y: tip.y + 2 },
+        { x: tip.x - 10, y: tip.y + 18 },
+        besideLimb(0.94, -1),
       ],
       10, 0, 44, 22, 22
     ).slice(1),
-    // back underneath the branch
-    ...spline(
-      [
-        { x: 258, y: 557 },
-        { x: 300, y: 538 },
-        { x: 350, y: 537 },
-        { x: 398, y: 548 },
-        { x: LEFT, y: TOP_Y + 24 },
-      ],
-      16, 3.5, 62, 22, 0
-    ).slice(1),
-    // and down the trunk, 1¼ turns, back to the start
-    ...helix(Math.PI, Math.PI * 3.5, TOP_Y + 24, BOTTOM_Y, 150).slice(1),
+    // back down underneath the limb
+    ...spline([...[0.94, 0.7, 0.45].map((t) => besideLimb(t, -1)), { x: LEFT, y: TOP_Y + 30 }], 16, 3.5, 62, 22, 0).slice(1),
+    // and down the trunk, ¾ of a turn, back to the start
+    ...helix(Math.PI, Math.PI * 2.5, TOP_Y + 30, BOTTOM_Y, 110).slice(1),
   ];
 
   // resample by 3D arc length so the snake moves at an even pace
@@ -251,7 +263,7 @@
   let nextFlick = 1.5;
   let clock = 0;
   let lookTarget = null;
-  const DEFAULT_APPLE = { x: 230, y: 610 };
+  let DEFAULT_APPLE = { x: 318, y: 546 }; // replaced below by the apple nearest the turn
   const SPEED = 34; // viewBox units per second
   const PAUSE = 3.6;
 
@@ -259,6 +271,19 @@
     const m = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)/.exec(node.getAttribute("transform") || "");
     return m ? { x: +m[1], y: +m[2] } : null;
   };
+  {
+    // the apple the snake reaches for: whichever hangs closest to where it stops
+    const stop = at(PAUSE_AT);
+    let best = Infinity;
+    document.querySelectorAll(".fruit").forEach((node) => {
+      const p = fruitPos(node);
+      const d = p ? Math.hypot(p.x - stop.x, p.y - stop.y) : Infinity;
+      if (d < best) {
+        best = d;
+        DEFAULT_APPLE = p;
+      }
+    });
+  }
   document.querySelectorAll(".fruit").forEach((node) => {
     const look = () => {
       lookTarget = fruitPos(node);
