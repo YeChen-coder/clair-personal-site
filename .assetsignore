@@ -1,0 +1,8 @@
+# Files Wrangler must not publish from this folder (assets.directory is ".")
+.wrangler
+.git
+wrangler.toml
+worker.js
+*.md
+README_BACKUPS
+_readme_translation_work
