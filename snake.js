@@ -284,6 +284,7 @@
   let headS = PAUSE_AT - 640; // start mid-climb, coiled on the trunk
   let pausedFor = 0;
   let lean = 0; // 0..1, how far the neck is reaching toward the apple
+  let idle = 0; // 0..1, the resting movement while it waits: fades in when it stops, out when it moves
   let flick = { start: -1, dur: 0.55 };
   let nextFlick = 1.5;
   let clock = 0;
@@ -494,7 +495,8 @@
       const dx = target.x - h.x;
       const dy = target.y - h.y;
       const d = Math.hypot(dx, dy) || 1;
-      const reach = Math.min(24, d * 0.3) * lean;
+      // the neck bobs a little toward the apple while it waits
+      const reach = Math.min(24, d * 0.3) * lean * (1 + 0.16 * Math.sin(clock * 1.7) * idle);
       for (const p of pts) {
         const k = Math.max(0, 1 - p.u / 0.2);
         const e = k * k * (3 - 2 * k);
@@ -502,6 +504,26 @@
         p.y += (dy / d) * reach * e;
       }
     }
+    // While it waits it never goes completely still: a slow wave runs down the
+    // body toward the tail, and the head sways as if looking around.
+    if (idle > 0.01) {
+      const base = pts.map((p) => ({ x: p.x, y: p.y }));
+      for (let i = 0; i < pts.length; i++) {
+        const a = base[Math.max(i - 1, 0)];
+        const b = base[Math.min(i + 1, pts.length - 1)];
+        const d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+        const nx = -(a.y - b.y) / d;
+        const ny = (a.x - b.x) / d;
+        const u = pts[i].u;
+        const env = Math.sin(Math.min(1, u / 0.14) * (Math.PI / 2)) * (0.55 + 0.9 * u);
+        const wave = Math.sin(((u * LENGTH) / 72) * Math.PI * 2 - clock * 2.3) * 3.4 * env;
+        const look = Math.sin(clock * 1.25) * 5.5 * Math.pow(Math.max(0, 1 - u / 0.3), 2);
+        const off = idle * (wave + look);
+        pts[i].x += nx * off;
+        pts[i].y += ny * off;
+      }
+    }
+
     // tangents, normals (pointing to the snake's upper side), widths
     for (let i = 0; i < pts.length; i++) {
       const a = pts[Math.max(i - 1, 0)];
@@ -669,6 +691,8 @@
 
   function step(dt) {
     clock += dt;
+    const resting = mode === "hold" || (mode === "loop" && pausedFor > 0);
+    idle += ((resting ? 1 : 0) - idle) * Math.min(1, dt * (resting ? 1.2 : 3));
     if (mode === "seek" || mode === "home") {
       const left = route.length - routeS;
       const top = mode === "seek" ? SEEK_SPEED : HOME_SPEED;
