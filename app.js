@@ -171,7 +171,7 @@
       "nav.github": "GitHub",
       "hero.eyebrow": "云、AI，以及一些真的会出问题的东西",
       "hero.manifesto":
-        "我是 Clair。平时会把 AI、云服务和各种现实设备接起来，做一些自己真的想用、也确实一直在用的东西。它们不一定非得聪明，但最好能在断网、重启和我懒得管它的时候，继续好好活着。",
+        "我是 Clair。平时会把 AI、云服务和各种现实设备接起来，做一些自己真的想用、也确实一直在用的东西。血肉苦弱，各种维护和上下文记忆挺占人类大脑 token 的，所以一切能傻瓜式就傻瓜式。",
       "hero.bio": "人生是旷野，可是代码是沼泽。能用就用，不能用就改；请放过自己，去折磨 AI。",
       "hero.github": "浏览 GitHub",
       "hero.tree": "查看精选项目",
@@ -295,7 +295,7 @@
       "nav.github": "GitHub",
       "hero.eyebrow": "Cloud, AI, and things that can actually break",
       "hero.manifesto":
-        "I'm Clair. I connect AI and cloud services to real devices, mostly to build things I genuinely want to use and then keep using. They do not have to be clever. They do have to survive outages, restarts, and the days when I cannot be bothered to babysit them.",
+        "I'm Clair. I connect AI and cloud services to real devices, mostly to build things I genuinely want to use and then keep using. The flesh is weak, and all the upkeep and context-keeping eat up a human brain's tokens, so anything that can be foolproof should be.",
       "hero.bio":
         "Life is a wilderness; code is a swamp. Use what works, change what doesn't—and please, let the AI suffer.",
       "hero.github": "Browse GitHub",

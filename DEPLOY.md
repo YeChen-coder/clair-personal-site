@@ -1,41 +1,44 @@
 # Deploy — Clair Y.Chen personal site
 
-Pure static assets. No build step. Root contains `index.html`.
+Static assets plus one small Worker. No build step. Root contains `index.html`.
 
-The main experience is a **literal illustrated orchard tree** (inline SVG): organic trunk, layered luminous canopy, ten clickable fruit (newest near the crown, older lower), McMaster SEP education in the soil/roots. Vanilla CSS + JS; no frameworks.
+The main experience is a **literal illustrated orchard tree** (inline SVG): organic trunk, layered luminous canopy, clickable fruit (newest near the crown, older lower), McMaster SEP education in the soil/roots. Vanilla CSS + JS; no frameworks.
 
-## Cloudflare Pages (recommended)
+The "Ask Clair's AI" chat (`chat.js`, `chat.css`) posts to `/api/chat` and `/api/warm`. `worker.js` rate-limits those per IP and forwards them, SigV4-signed, to the chat Lambda on AWS (Bedrock knowledge base + Aurora pgvector; infrastructure lives in the `CloudAIAgentDemo` project). Every other path is served from the static assets.
 
-### Option A — Drag & drop
+## Deploy (Cloudflare Workers)
 
-1. Open [Cloudflare Pages](https://dash.cloudflare.com/) → **Workers & Pages** → **Create** → **Pages** → **Upload assets**.
-2. Upload the entire contents of this folder (`index.html`, `styles.css`, `app.js`, `snake.js`, `assets/`, etc.).
-3. Deploy. You get a `*.pages.dev` URL. No custom domain needed.
-
-### Option B — Wrangler CLI
-
-From this directory:
+This site is a Worker with static assets (`wrangler.toml`), **not** Cloudflare Pages. From this directory:
 
 ```bash
-npx wrangler pages deploy .
+npx wrangler deploy
 ```
 
-### Option C — Workers
+`.assetsignore` keeps `worker.js`, `wrangler.toml`, `.dev.vars`, Markdown and work folders out of the published assets.
 
-If already bound as a Worker static site, redeploy with `./deploy.sh` if configured.
+### Secrets
+
+The Worker signs requests with the `clair-chat-worker` IAM user, which may only invoke the chat function URL:
+
+```bash
+npx wrangler secret put AWS_ACCESS_KEY_ID
+npx wrangler secret put AWS_SECRET_ACCESS_KEY
+```
+
+`CHAT_FUNCTION_URL` and `AWS_REGION` are plain vars in `wrangler.toml`.
 
 ## Local preview
 
+Put the same two keys in `.dev.vars` (git-ignored, never published), then:
+
 ```bash
-cd /workspace/clair-personal-site
-python3 -m http.server 8765
+npx wrangler dev --port 8787
 ```
 
-Then open `http://localhost:8765`. Hover/click fruit on the tree for project details (mobile: bottom sheet).
+Open `http://localhost:8787`. Hover/click fruit on the tree for project details (mobile: bottom sheet). Without `.dev.vars` the site works but the chat answers with an error.
 
 ## Notes
 
-- Bilingual ZH/EN toggle uses `localStorage` (`clair-site-lang`). Default: Chinese.
+- Bilingual ZH/EN toggle uses `localStorage` (`clair-site-lang`). Default: Chinese. The chat follows the page language.
 - Avatar: `assets/avatar.jpg`.
-- No backend, no environment secrets required.
 - Respects `prefers-reduced-motion` (skips ambience drift / fruit sway / canopy sway / falling leaves / scroll reveal).

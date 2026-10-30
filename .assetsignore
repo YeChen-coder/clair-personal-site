@@ -6,3 +6,7 @@ worker.js
 *.md
 README_BACKUPS
 _readme_translation_work
+.dev.vars
+.dev.vars*
+node_modules
+.gitignore
