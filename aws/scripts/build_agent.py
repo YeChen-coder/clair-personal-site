@@ -22,7 +22,10 @@ shutil.copy(root / "agent" / "main.py", build / "main.py")
 
 tmp = root / ".build" / "agent.zip"
 with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as z:
-    for path in sorted(p for p in build.rglob("*") if p.is_file() and "__pycache__" not in p.parts):
+    # bin/ holds console scripts pip generated for Windows (.exe); useless on the Linux runtime.
+    files = (p for p in build.rglob("*") if p.is_file() and "__pycache__" not in p.parts
+             and p.relative_to(build).parts[0] != "bin")
+    for path in sorted(files):
         info = zipfile.ZipInfo(path.relative_to(build).as_posix(), date_time=(2026, 1, 1, 0, 0, 0))
         info.compress_type = zipfile.ZIP_DEFLATED
         info.external_attr = 0o644 << 16  # AgentCore Runtime needs 644 on files

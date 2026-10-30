@@ -22,3 +22,11 @@ KEY="artifacts/$(basename "$ZIP")"
   --no-fail-on-empty-changeset --parameter-overrides BucketName="$BUCKET" \
   ClusterArn="$(out ClusterArn)" SecretArn="$(out SecretArn)" \
   CounterTableName="$(out CounterTableName)" AlertEmail="$EMAIL" AgentCodeKey="$KEY"
+
+# AWS creates these two log groups itself, so CloudFormation cannot set their retention. Keep 14 days.
+RUNTIME_ID=$("$AWS" cloudformation describe-stacks --region $REGION --stack-name clair-chat-app \
+  --query "Stacks[0].Outputs[?OutputKey=='AgentRuntimeArn'].OutputValue" --output text | sed 's#.*/##')
+for group in "/aws/bedrock-agentcore/runtimes/$RUNTIME_ID-DEFAULT" "aws/spans"; do
+  MSYS_NO_PATHCONV=1 "$AWS" logs put-retention-policy --region $REGION --log-group-name "$group" \
+    --retention-in-days 14 2>/dev/null || echo "log group $group not there yet; rerun later to set its retention"
+done

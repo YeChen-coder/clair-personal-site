@@ -391,6 +391,9 @@ Resources:
                 Action: [logs:CreateLogStream, logs:PutLogEvents]
                 Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/bedrock-agentcore/runtimes/*:log-stream:*"
               - Effect: Allow
+                Action: logs:PutResourcePolicy
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/bedrock-agentcore/runtimes/clair_chat_agent-*"
+              - Effect: Allow
                 Action: [xray:PutTraceSegments, xray:PutTelemetryRecords, xray:GetSamplingRules, xray:GetSamplingTargets]
                 Resource: "*"
               - Effect: Allow
@@ -438,6 +441,102 @@ Resources:
         GATEWAY_URL: !GetAtt Gateway.GatewayUrl
         COUNTER_TABLE: !Ref CounterTableName
         DAILY_LIMIT: !Ref DailyLimit
+
+  # ---------- observability: traces into CloudWatch (AgentCore Observability / GenAI dashboard) ----------
+  # Account-wide: X-Ray stores spans as CloudWatch Logs (Transaction Search). 1% of traces are indexed
+  # (free tier); all spans are still stored and shown in the AgentCore Observability dashboard.
+  # X-Ray creates the shared log group aws/spans itself (the name is reserved); its 14-day retention
+  # is set by scripts/deploy_app.sh once it exists.
+  XRayToLogsPolicy:
+    Type: AWS::Logs::ResourcePolicy
+    Properties:
+      PolicyName: !Sub "${Prefix}-xray-transaction-search"
+      PolicyDocument: !Sub |
+        {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Sid": "TransactionSearchXRayAccess",
+            "Effect": "Allow",
+            "Principal": { "Service": "xray.amazonaws.com" },
+            "Action": "logs:PutLogEvents",
+            "Resource": [
+              "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:aws/spans:*",
+              "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/application-signals/data:*"
+            ],
+            "Condition": {
+              "ArnLike": { "aws:SourceArn": "arn:aws:xray:${AWS::Region}:${AWS::AccountId}:*" },
+              "StringEquals": { "aws:SourceAccount": "${AWS::AccountId}" }
+            }
+          }]
+        }
+
+  TransactionSearch:
+    Type: AWS::XRay::TransactionSearchConfig
+    DependsOn: XRayToLogsPolicy
+    Properties:
+      IndexingPercentage: 1
+
+  # Gateway: its application logs to a log group, its traces to X-Ray.
+  GatewayLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/vendedlogs/bedrock-agentcore/gateway/APPLICATION_LOGS/${Prefix}-gateway"
+      RetentionInDays: 14
+
+  GatewayLogsSource:
+    Type: AWS::Logs::DeliverySource
+    Properties:
+      Name: !Sub "${Prefix}-gateway-logs"
+      LogType: APPLICATION_LOGS
+      ResourceArn: !GetAtt Gateway.GatewayArn
+
+  GatewayLogsDestination:
+    Type: AWS::Logs::DeliveryDestination
+    Properties:
+      Name: !Sub "${Prefix}-gateway-logs"
+      DeliveryDestinationType: CWL
+      DestinationResourceArn: !GetAtt GatewayLogs.Arn
+
+  GatewayLogsDelivery:
+    Type: AWS::Logs::Delivery
+    Properties:
+      DeliverySourceName: !Ref GatewayLogsSource
+      DeliveryDestinationArn: !GetAtt GatewayLogsDestination.Arn
+
+  GatewayTracesSource:
+    Type: AWS::Logs::DeliverySource
+    Properties:
+      Name: !Sub "${Prefix}-gateway-traces"
+      LogType: TRACES
+      ResourceArn: !GetAtt Gateway.GatewayArn
+
+  TracesDestination:
+    Type: AWS::Logs::DeliveryDestination
+    Properties:
+      Name: !Sub "${Prefix}-traces"
+      DeliveryDestinationType: XRAY
+
+  GatewayTracesDelivery:
+    Type: AWS::Logs::Delivery
+    DependsOn: TransactionSearch
+    Properties:
+      DeliverySourceName: !Ref GatewayTracesSource
+      DeliveryDestinationArn: !GetAtt TracesDestination.Arn
+
+  # Runtime: the service's own spans (sessions, invocations), next to the agent's ADOT spans.
+  RuntimeTracesSource:
+    Type: AWS::Logs::DeliverySource
+    Properties:
+      Name: !Sub "${Prefix}-runtime-traces"
+      LogType: TRACES
+      ResourceArn: !GetAtt AgentRuntime.AgentRuntimeArn
+
+  RuntimeTracesDelivery:
+    Type: AWS::Logs::Delivery
+    DependsOn: [TransactionSearch, GatewayTracesDelivery]
+    Properties:
+      DeliverySourceName: !Ref RuntimeTracesSource
+      DeliveryDestinationArn: !GetAtt TracesDestination.Arn
 
   # ---------- every two days: mirror GitHub docs into S3 and re-ingest what changed ----------
   SyncLogs:

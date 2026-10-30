@@ -61,6 +61,27 @@ the agent (tools called in-process, no AgentCore). It is the fallback: setting t
   `sync/handler.py` runs every 2 days: it mirrors the root READMEs of all public repos plus the files
   listed in `knowledge-docs.json` into S3 and re-ingests only what changed.
 
+## Observability
+
+Every question is one trace in **AgentCore Observability** (CloudWatch console → GenAI Observability,
+or the AgentCore console → Observability):
+
+```
+invoke_agent clair_chat_agent           the whole question; clair.result = answered / error code
+├─ DynamoDB.UpdateItem                  daily cap
+├─ chat claude-haiku-4-5                model decides (tool or answer)
+├─ tool get_cat_photo                   routing decision; clair.tool, clair.tool.status
+│  └─ POST                              MCP tools/call to the Gateway
+└─ chat claude-haiku-4-5                model writes the reply
+```
+
+- The agent uses ADOT (AWS Distro for OpenTelemetry), started from `main.py` with `initialize()`;
+  Bedrock, DynamoDB and HTTP calls are traced automatically, the tool spans are added by hand.
+- Spans land in the agent's own log group (stream `spans`); the Gateway sends its logs to
+  `/aws/vendedlogs/bedrock-agentcore/gateway/...` and its traces, like the Runtime's service spans,
+  to X-Ray. CloudWatch Transaction Search (account-wide) stores spans as logs and indexes 1%.
+- Visitor messages appear in spans and logs. They stay in this account and expire after 14 days.
+
 ## Cost and safety guards
 
 - **Budget**: $10/month for the whole account. Emails at 50% and 80%. At 100%, a budget action
@@ -71,7 +92,7 @@ the agent (tools called in-process, no AgentCore). It is the fallback: setting t
 - **Per answer**: at most 4 model calls of at most 700 output tokens each. A knowledge question costs
   about 5k input tokens on Claude Haiku 4.5.
 - **Idle cost**: Aurora scales to 0 ACU after 5 idle minutes. Runtime, Gateway and Lambda bill per
-  use. Logs are kept 14 days.
+  use. Logs and spans are kept 14 days (a few KB per question; CloudWatch Logs bills per GB).
 - **Access**: the Lambda function URL, the Runtime and the Gateway all require IAM (SigV4); unsigned
   calls get 401/403. Each role allows only what its layer does (e.g. the agent may call this one
   Gateway, the model and its counter, but cannot touch the knowledge base, Aurora or the messages). The S3 bucket blocks all public access; photos are

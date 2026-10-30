@@ -7,9 +7,19 @@ AgentCore Runtime starts this file and sends it POST /invocations (and GET /ping
 The agent has no tools of its own. It lists them from the AgentCore Gateway (MCP tools/list), lets
 Claude on Bedrock (Converse) pick one, and runs the pick with MCP tools/call. Both calls to the
 Gateway are SigV4-signed with this runtime's execution role.
+
+Each question is one OpenTelemetry trace (ADOT): an "invoke_agent" span with the model calls, a
+"tool <name>" span per routing decision and the AWS calls underneath, shown in AgentCore Observability.
 """
 
 from __future__ import annotations
+
+# Observability: the same as starting under `opentelemetry-instrument` (ADOT). AgentCore Runtime sets
+# the OTEL_* environment, so Bedrock, DynamoDB and HTTP calls become spans in AgentCore Observability.
+# Must run before boto3 is imported.
+from opentelemetry.instrumentation.auto_instrumentation import initialize
+
+initialize()
 
 import json
 import os
@@ -23,6 +33,7 @@ import boto3
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.exceptions import ClientError
+from opentelemetry import propagate, trace
 
 REGION = os.environ.get("REGION", "us-east-1")
 MODEL_ID = os.environ["MODEL_ID"]
@@ -34,6 +45,7 @@ MAX_STEPS = 4
 
 runtime = boto3.client("bedrock-runtime", region_name=REGION)
 ddb = boto3.client("dynamodb", region_name=REGION)
+tracer = trace.get_tracer("clair-chat-agent")
 
 SYSTEM = """You are the assistant on Clair Y.Chen's personal website. Visitors, often recruiters and \
 hiring managers, talk to you in a small chat box. Work out what each visitor wants and use the \
@@ -115,6 +127,15 @@ def tool_config() -> tuple[dict, dict]:
 
 
 def run_tool(call: dict, state: dict, names: dict) -> dict:
+    # One span per routing decision, so a trace shows which tool each message went to.
+    with tracer.start_as_current_span(f"tool {call['name']}") as span:
+        span.set_attribute("clair.tool", call["name"])
+        result = _run_tool(call, state, names)
+        span.set_attribute("clair.tool.status", result["toolResult"]["status"])
+        return result
+
+
+def _run_tool(call: dict, state: dict, names: dict) -> dict:
     state["tools"].append(call["name"])
     status, payload = "success", {}
     try:
@@ -235,11 +256,20 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path != "/invocations":
             return self._send(404, {"error": "not_found"})
-        try:
-            body = json.loads(self.rfile.read(int(self.headers.get("content-length", 0))) or b"{}")
-            result = chat(body if isinstance(body, dict) else {})
-        except ValueError:
-            result = {"error": "bad_json", "status": 400}
+        # One trace per question: continue the trace AgentCore Runtime started (traceparent / X-Ray
+        # headers) so the model calls, tool calls and counter update all hang under this span.
+        context = propagate.extract(dict(self.headers.items()))
+        with tracer.start_as_current_span("invoke_agent clair_chat_agent", context=context,
+                                          kind=trace.SpanKind.SERVER) as span:
+            try:
+                body = json.loads(self.rfile.read(int(self.headers.get("content-length", 0))) or b"{}")
+                result = chat(body if isinstance(body, dict) else {})
+            except ValueError:
+                result = {"error": "bad_json", "status": 400}
+            span.set_attribute("clair.result", result.get("error", "answered"))
+            session = self.headers.get("x-amzn-bedrock-agentcore-runtime-session-id")
+            if session:
+                span.set_attribute("session.id", session)
         self._send(200, result)
 
     def log_message(self, *args):
