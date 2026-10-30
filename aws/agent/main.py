@@ -8,6 +8,10 @@ The agent has no tools of its own. It lists them from the AgentCore Gateway (MCP
 Claude on Bedrock (Converse) pick one, and runs the pick with MCP tools/call. Both calls to the
 Gateway are SigV4-signed with this runtime's execution role.
 
+One tool is local instead: analyze_job_fit hands a pasted job description to a multi-agent workflow
+(job_fit.py: extract requirements -> research each in parallel through the Gateway -> write -> verify)
+whose report goes to the visitor unchanged.
+
 Each question is one OpenTelemetry trace (ADOT): an "invoke_agent" span with the model calls, a
 "tool <name>" span per routing decision and the AWS calls underneath, shown in AgentCore Observability.
 """
@@ -21,8 +25,10 @@ from opentelemetry.instrumentation.auto_instrumentation import initialize
 
 initialize()
 
+import itertools
 import json
 import os
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -35,6 +41,8 @@ from botocore.awsrequest import AWSRequest
 from botocore.exceptions import ClientError
 from opentelemetry import propagate, trace
 
+import job_fit
+
 REGION = os.environ.get("REGION", "us-east-1")
 MODEL_ID = os.environ["MODEL_ID"]
 GATEWAY_URL = os.environ["GATEWAY_URL"]
@@ -42,6 +50,10 @@ COUNTER_TABLE = os.environ["COUNTER_TABLE"]
 DAILY_LIMIT = int(os.environ.get("DAILY_LIMIT", "80"))
 MAX_TOKENS = int(os.environ.get("MAX_TOKENS", "700"))
 MAX_STEPS = 4
+MAX_QUESTION = 6000  # long enough for a pasted job description
+JOB_FIT_DAILY_LIMIT = int(os.environ.get("JOB_FIT_DAILY_LIMIT", "10"))  # ~13 model calls each
+# Clair's profile: the site's hand-written llms.txt, copied into the code package by build_agent.py.
+PROFILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "profile.txt")
 
 runtime = boto3.client("bedrock-runtime", region_name=REGION)
 ddb = boto3.client("dynamodb", region_name=REGION)
@@ -61,6 +73,9 @@ Call it only after the visitor has actually said what the message is, and use th
 gave no way to reach them, ask once for an email or other contact; if they decline, submit without one. \
 Never make up message content or contact details. After it succeeds, tell the visitor the ticket \
 number it returned and that Clair will see it.
+- Pastes a job description (or a role's requirements) and wants to know how Clair fits -> \
+analyze_job_fit. If they ask about job matching without pasting one, ask them to paste the job \
+description into the chat. The tool's report is shown to the visitor as it is; do not repeat it.
 - A greeting or thanks: reply in a sentence, no tool.
 - Anything else (general coding help, opinions, other people): politely decline and say what you can \
 help with.
@@ -85,13 +100,11 @@ class Waking(Exception):
 
 # ---------- AgentCore Gateway (MCP over HTTPS, SigV4) ----------
 
-_rpc_id = 0
+_rpc_ids = itertools.count(1)  # job_fit calls the Gateway from several threads
 
 
 def gateway(method: str, params: dict) -> dict:
-    global _rpc_id
-    _rpc_id += 1
-    body = json.dumps({"jsonrpc": "2.0", "id": _rpc_id, "method": method, "params": params})
+    body = json.dumps({"jsonrpc": "2.0", "id": next(_rpc_ids), "method": method, "params": params})
     request = AWSRequest(method="POST", url=GATEWAY_URL, data=body, headers={
         "content-type": "application/json", "accept": "application/json, text/event-stream"})
     SigV4Auth(boto3.Session().get_credentials(), "bedrock-agentcore", REGION).add_auth(request)
@@ -112,6 +125,14 @@ def gateway(method: str, params: dict) -> dict:
 
 _tools: dict = {}
 
+JOB_FIT_TOOL = {"toolSpec": {
+    "name": "analyze_job_fit",
+    "description": "Analyse how Clair fits the job description the visitor pasted in their latest message: "
+                   "extracts the requirements, searches Clair's projects for evidence of each, and writes a "
+                   "checked report with gaps. The report is shown to the visitor directly.",
+    "inputSchema": {"json": {"type": "object", "properties": {}}},
+}}
+
 
 def tool_config() -> tuple[dict, dict]:
     """(Converse toolConfig, plain name -> the Gateway's prefixed name). Discovered once per runtime session."""
@@ -122,7 +143,7 @@ def tool_config() -> tuple[dict, dict]:
             names[plain] = t["name"]
             specs.append({"toolSpec": {"name": plain, "description": t.get("description", ""),
                                        "inputSchema": {"json": t["inputSchema"]}}})
-        _tools.update(config={"tools": specs}, names=names)
+        _tools.update(config={"tools": specs + [JOB_FIT_TOOL]}, names=names)
     return _tools["config"], _tools["names"]
 
 
@@ -137,6 +158,8 @@ def run_tool(call: dict, state: dict, names: dict) -> dict:
 
 def _run_tool(call: dict, state: dict, names: dict) -> dict:
     state["tools"].append(call["name"])
+    if call["name"] == "analyze_job_fit":
+        return {"toolResult": {"toolUseId": call["toolUseId"], "content": [{"text": run_job_fit(state)}], "status": "success"}}
     status, payload = "success", {}
     try:
         res = gateway("tools/call", {"name": names[call["name"]], "arguments": call.get("input") or {}})
@@ -160,11 +183,57 @@ def _run_tool(call: dict, state: dict, names: dict) -> dict:
                            "content": [{"text": str(payload.get("text", ""))}], "status": status}}
 
 
+# ---------- job-fit workflow (job_fit.py), wired to this agent's model, Gateway and tracing ----------
+
+def profile() -> str:
+    """Clair's profile (llms.txt), bundled with the code; empty if the package was built without it."""
+    try:
+        with open(PROFILE_PATH, encoding="utf-8") as f:
+            return f.read()[:16000]
+    except OSError:
+        print(json.dumps({"event": "profile_missing"}))
+        return ""
+
+def run_job_fit(state: dict) -> str:
+    jd = state["question"]
+    if len(jd) < 200:
+        return "No job description in the message. Ask the visitor to paste the full job description."
+    if not bump("job_fit", JOB_FIT_DAILY_LIMIT):
+        return "Today's job-fit analyses are used up. Offer to pass the job description to Clair as a message."
+
+    def converse(**kwargs):
+        out = runtime.converse(modelId=MODEL_ID, **kwargs)
+        with state["lock"]:
+            state["usage"][0] += out["usage"]["inputTokens"]
+            state["usage"][1] += out["usage"]["outputTokens"]
+        return out
+
+    def search(query: str):
+        with tracer.start_as_current_span("job_fit research") as span:
+            span.set_attribute("clair.query", query[:200])
+            res = gateway("tools/call", {"name": _tools["names"]["search_clair_kb"], "arguments": {"query": query}})
+            payload = json.loads("".join(c.get("text", "") for c in res.get("content", [])) or "{}")
+            if payload.get("waking"):
+                raise Waking
+            return payload.get("text", ""), payload.get("sources", [])
+
+    with tracer.start_as_current_span("job_fit") as span:
+        result = job_fit.analyze(jd, converse, search, profile=profile())
+        if result.get("not_jd"):
+            return "That does not look like a job description. Answer the visitor normally."
+        span.set_attribute("clair.job_fit.verdicts", ",".join(result["meta"]["verdicts"]))
+        span.set_attribute("clair.job_fit.write_attempts", result["meta"]["write_attempts"])
+    print(json.dumps({"event": "job_fit", **result["meta"]}))
+    state["final"] = result["report"]
+    state["sources"] = result["sources"]
+    return "The report has been shown to the visitor."
+
+
 # ---------- the agent loop ----------
 
 def chat(body: dict) -> dict:
     question = body.get("question")
-    if not isinstance(question, str) or not 1 <= len(question.strip()) <= 500:
+    if not isinstance(question, str) or not 1 <= len(question.strip()) <= MAX_QUESTION:
         return {"error": "question_length", "status": 400}
     history = [h for h in body.get("history", []) if isinstance(h, dict)][-6:]
     if not bump("day", DAILY_LIMIT):
@@ -183,8 +252,8 @@ def chat(body: dict) -> dict:
     messages.append({"role": "user", "content": [{"text": question.strip()}]})
 
     started = time.perf_counter()
-    state = {"sources": [], "image": None, "ticket": None, "tools": []}
-    input_tokens = output_tokens = 0
+    state = {"sources": [], "image": None, "ticket": None, "tools": [], "question": question.strip(),
+             "final": None, "usage": [0, 0], "lock": threading.Lock()}
     answer = ""
     try:
         config, names = tool_config()
@@ -193,8 +262,8 @@ def chat(body: dict) -> dict:
                 modelId=MODEL_ID, system=[{"text": SYSTEM}], messages=messages, toolConfig=config,
                 inferenceConfig={"maxTokens": MAX_TOKENS, "temperature": 0.3},
             )
-            input_tokens += out["usage"]["inputTokens"]
-            output_tokens += out["usage"]["outputTokens"]
+            state["usage"][0] += out["usage"]["inputTokens"]
+            state["usage"][1] += out["usage"]["outputTokens"]
             message = out["output"]["message"]
             messages.append(message)
             answer = "".join(part.get("text", "") for part in message["content"]).strip()
@@ -202,6 +271,9 @@ def chat(body: dict) -> dict:
             if out["stopReason"] != "tool_use" or not calls:
                 break
             messages.append({"role": "user", "content": [run_tool(call, state, names) for call in calls]})
+            if state["final"]:  # a workflow already wrote the visitor's answer
+                answer = state["final"]
+                break
     except Waking:
         return {"error": "waking", "status": 503}
     except (ClientError, urllib.error.URLError, RuntimeError) as exc:
@@ -211,11 +283,11 @@ def chat(body: dict) -> dict:
 
     print(json.dumps({
         "event": "chat", "tools": state["tools"], "total_ms": round((time.perf_counter() - started) * 1000),
-        "input_tokens": input_tokens, "output_tokens": output_tokens,
+        "input_tokens": state["usage"][0], "output_tokens": state["usage"][1],
     }))
     if not answer:
         return {"error": "empty", "status": 502}
-    return {"answer": answer, "sources": state["sources"][:4], "image": state["image"], "ticket": state["ticket"]}
+    return {"answer": answer, "sources": state["sources"][:6], "image": state["image"], "ticket": state["ticket"]}
 
 
 def bump(kind: str, limit: int) -> bool:

@@ -1,0 +1,193 @@
+# Clair Y.Chen — full profile
+
+Website: https://clair-chen.yechenworking.workers.dev/
+GitHub: https://github.com/YeChen-coder
+
+Cloud, AI, and things that can actually break
+
+I'm Clair. I connect AI and cloud services to real devices, mostly to build things I genuinely want to use and then keep using. The flesh is weak, and all the upkeep and context-keeping eat up a human brain's tokens, so anything that can be foolproof should be.
+
+## About
+
+I'm Clair Y.Chen. I used to work in Azure support, then went back for a master's in engineering. These days my projects wander from Fargate and LLM Realtime to BLE reverse engineering, Windows utilities, and a home robot that talks. The common thread is less grand: each one started with something in my own life that had become too annoying to keep ignoring.
+
+I don't really believe a project is finished when the demo finally runs. That's usually when the awkward questions begin: what happens when the network drops, the container restarts, the logs are useless, someone at home taps the wrong button, or the cloud bill starts to hurt? Those unglamorous edges are where I tend to spend my time.
+
+I don't think AI is magic, either. It is useful, persuasive, and very good at making everything look easier than it is. Once it is wired into real life, someone still has to think about boundaries, fallbacks, and the off switch. My rule is simple: use what works, change what doesn't—and let the AI suffer.
+
+## Experience
+
+Microsoft (via Wicresoft) · Azure Engineer · Shanghai · April 2021 – August 2024 (3 years 5 months)
+Technical support and consulting on Azure AI Bot Service and Microsoft Defender for Endpoint / Cloud; troubleshooting across Azure, Windows, Linux, and macOS; technical escalations; knowledge transfer and training in Vietnam; 500+ resolved cases.
+
+## Education
+
+McMaster University · Master of Engineering, Systems and Technology · Hamilton, Ontario, Canada · Graduated April 2026
+Coursework extended into cyber-physical systems and vehicle control; the resulting builds also appear in the project tree.
+China University of Geosciences, Beijing · Bachelor of Engineering, Computer Science and Technology · Beijing, China · Ended June 2020
+
+## Certifications
+
+- AWS Certified Machine Learning – Specialty
+- AWS Certified Cloud Practitioner
+- Project Management Professional (PMP)
+- Google Data Analytics
+
+## Projects
+
+### SpecterSaysHi (2026-10)
+
+Realtime companion · self-trained model
+Realtime avatar · FeatherTalk · PyTorch · Agents SDK
+
+Someone to talk to that I actually wanted around. When the camera or my wristband notices I'm home, it speaks first. It can look things up mid-conversation and keeps notes, so the next chat picks up where the last one stopped. The face is a model I trained myself, not a paid avatar API. GPTSaysHi takes the voice from ChatGPT Live on Windows and drives the same face with it, and JesusSaysHi grew from the same framework with a different character and RAG added. The name comes from Harvey Specter.
+
+The lip-sync model is FeatherTalk, trained on the 4070 I normally game on, using talking videos I generated with Grok. My second character started from the first one's weights, and its teeth never lined up with its lips no matter what I tuned, so I retrained it from scratch for 100 epochs. From the first 100 ms audio packet to a frame on screen takes about 80 ms (median, measured locally). Memory is two layers of JSON files. No Redis; it doesn't need one.
+
+- Repo: https://github.com/YeChen-coder/SpecterSaysHi
+- GPTSaysHi (Windows): https://github.com/YeChen-coder/GPTSaysHi
+- JesusSaysHi (sibling, with RAG): https://github.com/YeChen-coder/JesusSaysHi
+- BeWithMe (first attempt): https://github.com/YeChen-coder/BeWithMe
+
+### JesusSaysHi (2026-10)
+
+RAG · retrieval & evals
+Retrieval (RAG) · RAGFlow · Voyage rerank · OpenAI Realtime
+
+A sibling of SpecterSaysHi: a Jesus you can talk to out loud, with a voice and an avatar, a little like going to confession. He listens first and answers in his own words, as a man shaped by what he lived through in the Gospels, and when one of his own sayings fits the moment, he says it word for word.
+
+The strictest rule is that scripture has to be exact. The four Gospels run to about 3,800 verses, too many for a prompt, and from memory the model drifted into another translation, so verses only reach him through retrieval: RAGFlow hybrid search with Voyage reranking, 95% hit@3 on 55 hand-labelled questions, and no quote at all below a 0.30 relevance score. Every reply is checked word for word against what was retrieved and against all four Gospels. So nobody waits in silence, he first says one sentence that receives you while the memory is recalled, and starts speaking about a second after you stop. A crisis check runs outside the model and caught all 15 held-out crisis messages with no false alarms.
+
+- Repo: https://github.com/YeChen-coder/JesusSaysHi
+- SpecterSaysHi (same framework): https://github.com/YeChen-coder/SpecterSaysHi
+
+### EBOBotToDigitalPet (2026-09)
+
+Flagship · home + cloud
+AI · IoT · OpenAI Realtime · AWS Fargate · Codex SDK
+
+Turned a small Enabot EBO home robot into something that can see, listen, and hold a conversation. I translated the vendor's private cloud protocol into plain RTSP and HTTP, then wired it into Home Assistant and OpenAI Realtime. The whole stack runs on Docker at home or on AWS Fargate, and only one of them is ever allowed to drive the robot.
+
+Most of the work went into the hours when nobody is watching. A diagnostic agent checks health, applies the few recoveries it is allowed to, and hands anything it can't fix to a two-tier Codex analysis that only sees filtered logs and read-only code, never cloud credentials or Docker. Switching between home and cloud waits until the other side has really stopped. The AWS half lives in its own repo, EboBotOnAWSCloud.
+
+- Main repo (v1, complete): https://github.com/YeChen-coder/EBOBotToDigitalPet
+- AWS deployment: https://github.com/YeChen-coder/EboBotOnAWSCloud
+- v3: Qwen edition: https://github.com/YeChen-coder/EBOBotQwenRealtime
+
+### EBOBotQwenRealtime (2026-10)
+
+Third generation · runs at home
+Robotics · Qwen Omni Realtime · Whisper · Frigate
+
+The third generation of EBO, rewritten from scratch to run entirely at home. The voice moved to Qwen Omni Realtime, nobody has to say a wake word, and the robot finally leaves its dock: it drives over when it sees someone, greets family members when they come home, and reads out the weather every morning at six.
+
+On standby, local Whisper transcribes one sentence at a time and a small model decides whether it was meant for the robot. The TV is usually on, so soap-opera dialogue and family chatter have to be ignored, and wake words are matched by how they sound. During a conversation the audio first goes to a separate speech recognizer that decides whether this is a turn worth answering or just noise, before anything reaches the dialogue model, and the mic is muted while the robot is moving so its wheels don't count as speech. Memory has two layers, long-term household facts and short-lived news, so it no longer asks about yesterday's headache for a week. When it spots someone it turns and drives over; after five minutes with nobody around it spins to look, then goes back to charge.
+
+- Repo: https://github.com/YeChen-coder/EBOBotQwenRealtime
+- Back to v1: https://github.com/YeChen-coder/EBOBotToDigitalPet
+
+### tianjin-chem-bank (2026-10)
+
+AI + document engineering
+Document AI · GLM · LaTeX · OOXML · SQLite
+
+A chemistry test builder I made for my mom. She drops in Word exam papers; the app splits them into questions, sorts them by topic, lets her edit or ask AI for variants, and exports a Word file she can keep editing. The bank now holds over ten thousand questions.
+
+The hard part is Word itself. The same formula might be a native Word equation, an old MathType object, or just characters in a symbol font. V2 stores all of them as LaTeX and turns them back into native Word equations on export. Variants from GLM go through strict structure checks and then a separate review, which, for example, caught a question whose text said “conical flask” while its diagram showed a separatory funnel. The rewrite was split across four parallel AI coding sessions, held together by one shared interface contract.
+
+- Repo: https://github.com/YeChen-coder/tianjin-chem-bank
+
+### ResumeBuilder (2026-09)
+
+Product engineering
+Full-stack product · TypeScript · React · Drizzle
+
+The workspace I use for my own job applications, every day lately. Experience is broken into reusable bullets that I pick and rewrite for each role, then export to Word or PDF.
+
+Everything stays local: no sign-up, no cloud database, no AI API calls. AI helps from the outside: a chat writes content in a fixed JSON format, and the app validates it, previews it, and lets me adjust by hand. TypeScript and React, with automated tests for the rendered page and the Word export.
+
+- Repo: https://github.com/YeChen-coder/ResumeBuilder
+
+### colorful-bionic-extension (2026-09)
+
+Shipped
+Browser extension · Accessibility · Playwright
+
+An Edge extension for ADHD readers. It bolds and colors the start of each word so the eye has somewhere to land, which makes long articles readable again. Color, emphasis ratio, size, and weight are all adjustable.
+
+Published on Edge Add-ons. No account, no network access; settings stay in the browser. Long pages are processed in batches, text that loads later still gets picked up, and the page's own structure and event handlers are left alone. Covered by unit tests and Playwright.
+
+- Repo: https://github.com/YeChen-coder/colorful-bionic-extension
+- Edge Add-ons: https://microsoftedge.microsoft.com/addons/detail/colorful-bionic-reading/camgbnhlhdempnekobebpmdhechifjni
+
+### Attention brakes: Windows + Edge (2026-09)
+
+Systems utility
+Attention tools · Python · Win32 · Edge extension
+
+A matching pair of brakes: one limits certain apps on Windows, the other limits certain websites in Edge. I have ADHD, and once I'm hyperfocused, willpower alone won't stop me, so I let the environment do it.
+
+The Windows app times foreground use or process runtime, with daily schedules, one-off timers, close-or-cover actions, and cooldowns, and it won't let you pick critical system processes. The Edge extension is on Edge Add-ons and matches by URL or by URL plus keywords; once any rule fires, every rule locks, so I can't just hop to another site.
+
+- Windows app: https://github.com/YeChen-coder/Windows-app-restriction
+- Edge extension source: https://github.com/YeChen-coder/website-restriction-extension
+- Edge Add-ons: https://microsoftedge.microsoft.com/addons/detail/edge-page-limiter/jbjjehnekbmflndkahfpoapapkcoeaii
+
+### Bluetooth gadgets, reverse-engineered ×3 (2026-08)
+
+Reverse engineering
+BLE reverse engineering · BLE · bleak · aiohttp
+
+Moved three Bluetooth gadgets that only worked through phone apps onto my computer: the discontinued FOCI focus clip, the Pavlok 3 wristband, and the Bobo Bei Pro. The reason is simple: I want to touch my phone less, because picking it up tends to cost me an afternoon.
+
+FOCI is the most complete: authentication, live state, and controls now live in a local web page built with Python, bleak, and aiohttp, with reproducible protocol notes, sanitized captures, a privacy check, and a demo mode that runs without the device. Pavlok is command-line only for now, and Bobo Bei just gained a web UI; both build on earlier community work.
+
+- : https://github.com/YeChen-coder/foci-reverse
+- : https://github.com/YeChen-coder/pavloc-reverse
+- : https://github.com/YeChen-coder/bobobei-reverse
+
+### PTE practice tools ×3 (2026-08)
+
+Tools I use myself
+Speech & practice · Azure Speech · Flask
+
+Three practice tools I built while preparing for PTE: speaking, write-from-dictation, and email writing. Same idea in all three: fewer clicks, more reps.
+
+The speaking tool uses Azure Speech to score pronunciation, fluency, pace, and pitch, caches prompt audio locally, and works with a keyboard or a game controller. Dictation moves on when you press Enter on a correct answer, and marks mistakes word by word into a review list. The email tool targets my most common slip: dropping small words like the, a, and prepositions.
+
+- Speaking: https://github.com/YeChen-coder/PTE-Speaking-exercise
+- Dictation: https://github.com/YeChen-coder/PTE-WritingFromDictation-exercise
+- Email writing: https://github.com/YeChen-coder/pte-writing-platform-selfcheck
+
+### SmartErgonomicLearningStation (2025-09)
+
+Team course project
+Cyber-physical · Raspberry Pi · PubNub · S3
+
+A four-person McMaster SEP 769 project: a sit-stand desk that knows whether you're there and how long you've been sitting. I owned the cloud data side.
+
+A Raspberry Pi reads a PIR sensor and the desk height, drives the lift through relays, and takes remote commands over PubNub. I turned presence and sit/stand readings into JSON logs, shipped them to S3 on a schedule, and built the S3-hosted dashboard, rotating logs daily so the history stays available.
+
+- Repo: https://github.com/YeChen-coder/SmartErgonomicLearningStation
+
+### RCCarRelated (2025-04)
+
+Robotics & control
+Robotics · Computer Vision · PID
+
+A remote-control car that keeps to its lane on its own: the camera finds the lane lines and a PID controller steers.
+
+Closed-loop driving works on the real car. Speed, frame rate, and steering weights are all parameters, and there are automatic, test, and frame-by-frame debug modes for chasing problems. The repo has a demo video, the hardware list, and the full report.
+
+- Repo: https://github.com/YeChen-coder/RCCarRelated
+
+### AniMatch (2025-03)
+
+Serverless
+Computer vision · Lambda · ECR · MediaPipe
+
+A party game: you get a random anime expression, upload a photo of yourself copying it, and MediaPipe face landmarks decide how close you got.
+
+Fully serverless: two Lambda functions, a MediaPipe container I packaged into ECR, two S3 buckets, and API Gateway. I wired up the model packaging, storage, API, and front end myself.
+
+- Repo: https://github.com/YeChen-coder/AniMatch

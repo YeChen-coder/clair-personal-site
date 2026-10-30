@@ -1,0 +1,83 @@
+# Clair Y.Chen — AI Engineer
+
+> AI engineer based in Hamilton, Ontario, Canada. Actively looking for AI engineering roles; open to relocation and on-site work. Builds LLM agents, RAG and realtime voice systems on AWS and connects them to real devices. Previously 3 years 5 months as an Azure engineer at Microsoft (via Wicresoft), 500+ resolved support cases.
+
+- Email: yechenforwork@gmail.com
+- GitHub: https://github.com/YeChen-coder
+- Website: https://clair-chen.yechenworking.workers.dev/ (its chat answers questions about Clair's work, can check a pasted job description against Clair's projects, and can pass a message to Clair)
+
+## Skills
+
+Every item below is used in at least one project listed on this page.
+
+- LLM agents and orchestration: tool calling (Amazon Bedrock Converse, MCP), multi-agent workflows (parallel research, writer and verifier), Amazon Bedrock AgentCore (Runtime, Gateway), OpenAI Agents SDK, Codex SDK
+- Retrieval-augmented generation: Bedrock Knowledge Bases, Aurora PostgreSQL pgvector, RAGFlow hybrid search, Voyage reranking, retrieval evaluation
+- Realtime voice AI: OpenAI Realtime, Qwen Omni Realtime, Whisper; low-latency audio-to-avatar pipelines
+- Model training: PyTorch; trained a lip-sync model (FeatherTalk) on a local GPU
+- Cloud: AWS (Lambda, ECS/Fargate, DynamoDB, S3, Aurora Serverless, SNS, CloudFormation, CloudWatch/X-Ray via OpenTelemetry); Azure (3+ years of enterprise support)
+- Devices and integration: Home Assistant, RTSP, BLE reverse engineering, Raspberry Pi
+- Languages and apps: Python, TypeScript, React
+
+## Featured projects
+
+### Ask Clair's AI — the chat on this website (2026-10)
+Code and architecture: https://github.com/YeChen-coder/clair-personal-site/tree/main/aws
+- Triage agent hosted on Amazon Bedrock AgentCore Runtime: Claude Haiku 4.5 tool use routes each visitor message to RAG over Clair's GitHub docs, a message ticket (DynamoDB + SNS email), a photo tool, or a job-fit analysis.
+- Job-fit analysis is a multi-agent workflow: extract the requirements from a pasted job description, research each in parallel, grade the evidence, write a report, and have a verifier check it against the evidence before anything reaches the visitor.
+- Tools are exposed as MCP tools through AgentCore Gateway; everything is CloudFormation; traced end to end with OpenTelemetry.
+- Cost and safety built in from the start: per-IP rate limits, daily caps, IAM-only endpoints and an automatic budget cut-off.
+
+### EBOBotToDigitalPet and EBOBotQwenRealtime — a home robot that talks (2026-09, 2026-10)
+https://github.com/YeChen-coder/EBOBotToDigitalPet · https://github.com/YeChen-coder/EBOBotQwenRealtime
+- Turned an Enabot EBO home robot into a robot that sees, listens and holds a conversation: translated the vendor's private cloud protocol into plain RTSP and HTTP, then wired it into Home Assistant and OpenAI Realtime.
+- Runs on Docker at home or on AWS Fargate (infrastructure in CloudFormation), with a handover that guarantees only one side ever drives the robot.
+- A diagnostic agent checks health, applies only the recoveries it is allowed to, and escalates the rest to a two-tier Codex analysis that sees filtered logs and read-only code, never cloud credentials.
+- Third generation moved the voice from OpenAI Realtime to Qwen Omni Realtime to run entirely at home. Qwen has no built-in noise reduction, so TV and phone audio that OpenAI had filtered out began triggering false wake-ups; fixed with a gate before any conversation starts: local Whisper transcribes the speech and a small model judges whether it was addressed to the robot.
+- Also in v3: two-layer memory (household facts and short-lived news), and the robot drives over to greet people and returns to charge on its own.
+
+### SpecterSaysHi — realtime voice companion with a self-trained avatar (2026-10)
+https://github.com/YeChen-coder/SpecterSaysHi
+- Voice companion that speaks first when a camera or wristband notices Clair is home, looks things up mid-conversation, and keeps two-layer memory between chats.
+- The face is a lip-sync model (FeatherTalk, PyTorch) Clair trained on a local RTX 4070, not a paid avatar API; about 80 ms from the first 100 ms audio packet to a frame on screen (median, measured locally).
+- The same framework drives two sibling projects: GPTSaysHi (ChatGPT voice on Windows) and JesusSaysHi.
+
+### JesusSaysHi — realtime voice character grounded in a fixed text (2026-10)
+https://github.com/YeChen-coder/JesusSaysHi
+- The four Gospels (about 3,800 verses) do not fit in a prompt, and from memory the model quoted another translation, so scripture reaches the character only through retrieval: RAGFlow with structure-aware chunks, hybrid search and Voyage reranking, plus a relevance threshold enforced in code; below it, nothing is recalled.
+- Ingestion enrichment: users speak modern English while the text is scripture ("burned out" never appears in it), so at ingestion an LLM wrote 5 keywords and 3 likely questions in modern phrasing for each of about 4,300 verse chunks. With parent-child chunking (match a verse, hand the model its whole section) and query rewriting, hybrid search then beat dense-only retrieval (91-93% vs 87% hit@3 in an ablation).
+- Redesigned after evaluation: an earlier design that could only say what was retrieved scored well on retrieval (95% hit@3 on 55 hand-labelled questions, with an ablation study) but sounded like someone looking verses up, not a person. The current design treats the Gospels as his own memory: whole episodes of his life are retrieved and told in his own words.
+- Two-phase reply in one realtime session: a first prompt has him say one short sentence that receives what the user said while retrieval runs in the background, then a second prompt continues with the retrieved memory. Same session, so the context stays continuous; median 1.9 s from the end of speech to his first sound.
+- A small model classifies every turn (information, needs a professional, conversation), and the label is enforced in code because a prompt rule alone did not hold. Every reply is checked for faithfulness to the retrieved episode and for verbatim scripture; the full realtime model was chosen over mini after measuring detail errors (18 of 30 tellings vs 4 of 23).
+- A crisis check runs as a guardrail outside the model.
+
+## Other projects
+
+- [tianjin-chem-bank](https://github.com/YeChen-coder/tianjin-chem-bank): document AI that splits Word exam papers into a bank of 10,000+ questions, keeps formulas as LaTeX and exports native Word equations; AI-generated variants pass structure checks and a separate review. GLM, LaTeX, OOXML, SQLite.
+- [ResumeBuilder](https://github.com/YeChen-coder/ResumeBuilder): local-first resume workspace with reusable bullets and Word/PDF export; AI output arrives as validated JSON. TypeScript, React, Drizzle.
+- [colorful-bionic-extension](https://github.com/YeChen-coder/colorful-bionic-extension): reading extension for ADHD readers, published on the Microsoft Edge Add-ons store.
+- [Attention brakes](https://github.com/YeChen-coder/Windows-app-restriction): limits chosen apps on Windows (Python, Win32) and websites in Edge (published extension).
+- [Bluetooth gadgets, reverse-engineered ×3](https://github.com/YeChen-coder/foci-reverse): moved three app-only BLE devices (FOCI, Pavlok 3, Bobo Bei Pro) onto a computer. Python, bleak.
+- [PTE practice tools ×3](https://github.com/YeChen-coder/PTE-Speaking-exercise): speaking, dictation and email-writing practice. Azure Speech, Flask.
+- [SmartErgonomicLearningStation](https://github.com/YeChen-coder/SmartErgonomicLearningStation): four-person McMaster course project, a sit-stand desk that tracks presence and sitting time. Raspberry Pi, PubNub, S3.
+- [RCCarRelated](https://github.com/YeChen-coder/RCCarRelated): lane-keeping RC car with computer vision and a PID controller.
+- [AniMatch](https://github.com/YeChen-coder/AniMatch): party game scoring how well a photo copies an anime expression. AWS Lambda, ECR, MediaPipe.
+
+## Experience
+
+- Microsoft (via Wicresoft), Azure Engineer, Shanghai, April 2021 – August 2024 (3 years 5 months): technical support and consulting on Azure AI Bot Service and Microsoft Defender for Endpoint / Cloud; troubleshooting across Azure, Windows, Linux and macOS; technical escalations; knowledge transfer and training in Vietnam; 500+ resolved cases.
+
+## Education
+
+- McMaster University, Master of Engineering, Systems and Technology, Hamilton, Ontario, Canada, graduated April 2026
+- China University of Geosciences, Beijing, Bachelor of Engineering, Computer Science and Technology, June 2020
+
+## Certifications
+
+- AWS Certified Machine Learning – Specialty
+- AWS Certified Cloud Practitioner
+- Project Management Professional (PMP)
+- Google Data Analytics
+
+## More detail
+
+- Full profile with every project's engineering story: https://clair-chen.yechenworking.workers.dev/llms-full.txt (Chinese: https://clair-chen.yechenworking.workers.dev/llms-full.zh.txt)

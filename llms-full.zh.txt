@@ -1,0 +1,193 @@
+# Clair Y.Chen — 完整介绍
+
+网站: https://clair-chen.yechenworking.workers.dev/
+GitHub: https://github.com/YeChen-coder
+
+云、AI，以及一些真的会出问题的东西
+
+我是 Clair。平时会把 AI、云服务和各种现实设备接起来，做一些自己真的想用、也确实一直在用的东西。血肉苦弱，各种维护和上下文记忆挺占人类大脑 token 的，所以一切能傻瓜式就傻瓜式。
+
+## 关于
+
+我是 Clair Y.Chen。之前做过 Azure 技术支持，后来又去读了工程硕士。现在做的东西跨度有点大：从云上的 Fargate、LLM Realtime，到蓝牙逆向、Windows 小工具和会自己说话的家用机器人。共同点倒是很简单——它们都来自我生活里某个已经烦到不能再装看不见的问题。
+
+我不太相信“做个 demo 就算完成”。东西第一次跑起来，通常只是麻烦的开始：断网会怎样，容器重启会怎样，日志够不够看，家里人会不会误触，成本会不会越跑越肉疼。就是这些不太光鲜的边边角角，反而最容易让我一直折腾下去。
+
+我也不太想把 AI 写成魔法。它很好用，也很诱人，甚至很容易让人误以为什么都已经变简单了。但一旦真的把它接进生活，边界、兜底和人工控制还是得有人认真想。反正我的原则一直没变：能用就用，不能用就改；放过自己，折磨 AI。
+
+## 工作经历
+
+Microsoft（经由 Wicresoft）· Azure 工程师 · 上海 · 2021 年 4 月 – 2024 年 8 月（3 年 5 个月）
+Azure AI Bot Service、Microsoft Defender for Endpoint / Cloud 的技术支持与咨询；跨 Azure、Windows、Linux、macOS 排障与技术升级；曾在越南做知识传递与培训；累计处理 500+ 案例。
+
+## 教育
+
+McMaster University · 工程硕士（系统与技术） · 加拿大安大略省汉密尔顿 · 2026 年 4 月毕业
+课程实践延伸至赛博物理系统与车辆控制；相关成果也在项目树中展示。
+中国地质大学（北京）· 工学学士（计算机科学与技术） · 北京 · 2020 年 6 月结业
+
+## 证书
+
+- AWS Certified Machine Learning – Specialty
+- AWS Certified Cloud Practitioner
+- Project Management Professional (PMP)
+- Google Data Analytics
+
+## 项目
+
+### SpecterSaysHi (2026-10)
+
+实时陪伴 · 自己训练的模型
+实时数字人 · FeatherTalk · PyTorch · Agents SDK
+
+一个我自己想要的、会说话的“人”。摄像头或手环发现我回来了，它会先开口；聊着天能顺手查网页，聊完把要点记下来，下次接着聊。脸是我自己训练的数字人模型，不是买来的接口。GPTSaysHi 是它的衍生版：直接拿 Windows 上 ChatGPT Live 的声音去驱动同一张脸；JesusSaysHi 是同一套框架上长出来的兄弟项目，换了角色，加了 RAG。名字来自 Harvey Specter。
+
+嘴型模型用的是 FeatherTalk，在我那张打游戏的 4070 上训，素材是用 Grok 生成的说话视频。第二个角色一开始是接着第一个角色的权重训的，牙和嘴唇怎么调都对不上，最后干脆从头训了 100 轮才顺眼。从收到第一个 100 ms 音频包到画面出来，本机实测中位数大约 80 ms。记忆就是两层 JSON 文件，没上 Redis，用不着。
+
+- 仓库: https://github.com/YeChen-coder/SpecterSaysHi
+- GPTSaysHi（Windows 版）: https://github.com/YeChen-coder/GPTSaysHi
+- JesusSaysHi（加了 RAG 的兄弟项目）: https://github.com/YeChen-coder/JesusSaysHi
+- BeWithMe（最早的尝试）: https://github.com/YeChen-coder/BeWithMe
+
+### JesusSaysHi (2026-10)
+
+RAG · 检索与评测
+检索增强 · RAGFlow · Voyage rerank · OpenAI Realtime
+
+SpecterSaysHi 的兄弟项目：一个可以开口聊天的耶稣，有声音也有数字人，有点像去告解。他先听你说完，再用自己的话回应，像一个从福音书里走过来的人；话说到合适的地方，会一字不差地说出他自己说过的话。
+
+最硬的规矩是：引用必须是原文。四福音大约 3,800 节，塞不进 prompt，而模型凭记忆背还会背成别的译本，所以经文只能靠检索送到他嘴边：RAGFlow 混合检索加 Voyage 重排，55 道手工标注的问题里 hit@3 到了 95%，相关度低于 0.30 就干脆不引。每句回复都和检索到的原文、四福音全文逐字比对。为了不让人干等，他先说一句接住你的话，同时在后台“回忆”经文，你说完大约一秒多他就开口。危机检测放在模型外面，留出来的 15 条危机消息全部识别，没有误报。
+
+- 仓库: https://github.com/YeChen-coder/JesusSaysHi
+- SpecterSaysHi（同一套框架）: https://github.com/YeChen-coder/SpecterSaysHi
+
+### EBOBotToDigitalPet (2026-09)
+
+主项目 · 本地 + 云端
+AI · IoT · OpenAI Realtime · AWS Fargate · Codex SDK
+
+把家里那台 Enabot EBO 小机器人改成能看、能听、能聊天的陪伴。厂商的私有云协议被我转成普通的 RTSP 和 HTTP，再接上 Home Assistant 和 OpenAI Realtime。整套东西既能在家里的 Docker 上跑，也能整个搬上 AWS Fargate，但同一时间只允许一边控制机器人。
+
+真正花时间的是“没人盯着的时候”。我写了一个诊断 Agent：先查健康状况，能自己恢复的就按规矩恢复，修不好的再交给 Codex 分两级分析；它只看得到过滤过的日志和只读代码，碰不到云端凭证，也碰不到 Docker。本地和云端切换之前，必须先确认另一边真的停了。AWS 那一半单独放在 EboBotOnAWSCloud。
+
+- 主仓库（v1 完整版）: https://github.com/YeChen-coder/EBOBotToDigitalPet
+- AWS 部署: https://github.com/YeChen-coder/EboBotOnAWSCloud
+- v3：通义千问版: https://github.com/YeChen-coder/EBOBotQwenRealtime
+
+### EBOBotQwenRealtime (2026-10)
+
+第三代 · 只在本地跑
+机器人 · Qwen Omni Realtime · Whisper · Frigate
+
+EBO 的第三代，推倒重写，只在家里跑。语音换成了通义千问 Omni Realtime，不用先喊唤醒词；机器人也终于真正离开了充电座：看到人会开过去，家里人回来会主动打招呼，每天早上六点还会播一遍天气。
+
+待机时用本地 Whisper 一句一句转写，再让一个小模型判断这句话是不是在跟它说：家里电视常开着，电视剧台词和家人之间的闲聊它得忍住不接，唤醒词则按读音模糊匹配。聊天时声音先进一条单独的语音识别，先判断这一轮该不该接、是不是只是杂音，再交给对话模型；机器人自己在动的时候麦克风关掉，免得把轮子声当成说话。记忆分两层，长期的家庭信息和会过期的近况分开放，不会再把“今天不舒服”反复问上一个礼拜。认出人以后它会转过去、开过去，五分钟没人就原地转一圈找，再找不到就自己回去充电。
+
+- 仓库: https://github.com/YeChen-coder/EBOBotQwenRealtime
+- 回到 v1: https://github.com/YeChen-coder/EBOBotToDigitalPet
+
+### tianjin-chem-bank (2026-10)
+
+AI + 文档工程
+文档 AI · GLM · LaTeX · OOXML · SQLite
+
+给我妈做的化学组卷工具。她把 Word 试卷丢进来，程序把题拆好、按知识点分好类；她可以直接改题、让 AI 出变式，最后导出一份还能接着编辑的 Word。题库里现在有一万多道题。
+
+最难的是 Word 本身：同一个化学式，可能是 Word 公式，可能是老的 MathType 对象，也可能只是符号字体里的几个字。V2 把它们统一转成 LaTeX 存起来，导出时再变回 Word 原生公式。GLM 出的变式先过严格的结构检查，再过一轮独立核对，比如有道题文字写“锥形瓶”、图里画的却是分液漏斗，就被拦了下来。这次重构拆给四个 AI 编码会话并行写，靠一份共同的接口约定拼到一起。
+
+- 仓库: https://github.com/YeChen-coder/tianjin-chem-bank
+
+### ResumeBuilder (2026-09)
+
+产品工程
+全栈产品 · TypeScript · React · Drizzle
+
+我自己投简历用的工作台，现在也天天在用。经历拆成一条条可复用的素材，针对不同岗位挑选、改写，再导出 Word 或 PDF。
+
+全部在本地：不用注册，不连云数据库，也不调 AI 接口。和 AI 的配合方式是让外面的 Chat 按固定 JSON 格式写好内容，导进来以后校验、预览、再手动微调。TypeScript + React，渲染结果和 Word 导出都有自动测试。
+
+- 仓库: https://github.com/YeChen-coder/ResumeBuilder
+
+### colorful-bionic-extension (2026-09)
+
+已上架
+浏览器扩展 · Accessibility · Playwright
+
+给 ADHD 读者的 Edge 扩展：把每个词的前半截加粗、上色，让眼睛有个落点，长文章才读得下去。颜色、加粗比例、字号、粗细都能调。
+
+已经上架 Edge 商店。不要账号，不联网，设置只存在浏览器里。长页面分批处理，后加载出来的正文也能跟上，而且不破坏原网页的结构和事件。有单元测试，也有 Playwright 测试。
+
+- 仓库: https://github.com/YeChen-coder/colorful-bionic-extension
+- Edge 商店: https://microsoftedge.microsoft.com/addons/detail/colorful-bionic-reading/camgbnhlhdempnekobebpmdhechifjni
+
+### 注意力刹车：Windows + Edge (2026-09)
+
+系统工具
+注意力管理 · Python · Win32 · Edge extension
+
+两个配套的“刹车”：一个在 Windows 上限制某些程序，一个在 Edge 上限制某些网站。我有 ADHD，一进入心流就很难停下来，与其指望意志力，不如让环境替我踩刹车。
+
+Windows 版按前台时间或进程运行时间计时，支持日程、一次性限时、直接关闭或遮住窗口，还有冷却期，系统关键进程不让选。网页版已上架 Edge 商店，可以按网址、或网址加关键词匹配；任何一条规则触发，所有规则一起锁住，免得我换个网站接着刷。
+
+- Windows 版: https://github.com/YeChen-coder/Windows-app-restriction
+- Edge 扩展源码: https://github.com/YeChen-coder/website-restriction-extension
+- Edge 商店: https://microsoftedge.microsoft.com/addons/detail/edge-page-limiter/jbjjehnekbmflndkahfpoapapkcoeaii
+
+### 蓝牙小设备逆向 ×3 (2026-08)
+
+逆向工程
+蓝牙逆向 · BLE · bleak · aiohttp
+
+把三个只能靠手机 App 用的蓝牙小设备搬到电脑上：已经停产的 FOCI 专注力夹子、Pavlok 3 手环，还有 Bobo Bei Pro。原因很简单：我想少碰手机，一拿起来半天就没了。
+
+FOCI 做得最完整：认证、实时状态和控制都搬进了本地网页，用 Python、bleak 和 aiohttp 写，附可复现的协议笔记、脱敏抓包、隐私检查，还有不接设备也能跑的演示模式。Pavlok 目前是命令行，Bobo Bei 只是多了个网页界面——这两个都站在社区前人的肩膀上。
+
+- : https://github.com/YeChen-coder/foci-reverse
+- : https://github.com/YeChen-coder/pavloc-reverse
+- : https://github.com/YeChen-coder/bobobei-reverse
+
+### PTE 练习工具 ×3 (2026-08)
+
+自用小工具
+语音与练习 · Azure Speech · Flask
+
+备考 PTE 时给自己做的三个练习工具：口语、听写、写作邮件。出发点都一样：少点几下鼠标，多练几道题。
+
+口语版接 Azure Speech，给发音、流利度、语速和语调打分，题目音频本地缓存，键盘和手柄都能操作。听写版答对按回车直接下一题，答错逐词标出来，自动进错题本。写作版专门抓我最常犯的错：漏掉 the、a 和介词这类小词。
+
+- 口语: https://github.com/YeChen-coder/PTE-Speaking-exercise
+- 听写: https://github.com/YeChen-coder/PTE-WritingFromDictation-exercise
+- 写作邮件: https://github.com/YeChen-coder/pte-writing-platform-selfcheck
+
+### SmartErgonomicLearningStation (2025-09)
+
+团队课程项目
+赛博物理 · Raspberry Pi · PubNub · S3
+
+McMaster SEP 769 的四人团队项目：一张知道你在不在、坐了多久的升降桌。我负责云端数据这一块。
+
+树莓派读 PIR 传感器和桌面高度，用继电器控制升降，PubNub 负责远程控制。我把在席和坐站数据整理成 JSON 日志，定时传到 S3，再做了一个放在 S3 上的网页仪表盘；日志按天轮换，历史数据也能回看。
+
+- 仓库: https://github.com/YeChen-coder/SmartErgonomicLearningStation
+
+### RCCarRelated (2025-04)
+
+机器人控制
+机器人 · Computer Vision · PID
+
+一辆靠摄像头自己沿着车道跑的遥控车：视觉找车道线，PID 控制方向。
+
+在真车上跑通了闭环。速度、帧率、转向权重都做成了参数，有自动、测试和逐帧调试三种模式，出问题可以一帧一帧地找。仓库里有演示视频、硬件清单和完整报告。
+
+- 仓库: https://github.com/YeChen-coder/RCCarRelated
+
+### AniMatch (2025-03)
+
+无服务器架构
+计算机视觉 · Lambda · ECR · MediaPipe
+
+一个聚会小游戏：随机抽一张动漫表情，你上传自己模仿的照片，用 MediaPipe 的脸部关键点算有多像。
+
+全部无服务器：两个 Lambda、一个自己打包放进 ECR 的 MediaPipe 容器、两个 S3 桶，再加 API Gateway。模型打包、存储、接口和前端都是我自己串起来的。
+
+- 仓库: https://github.com/YeChen-coder/AniMatch

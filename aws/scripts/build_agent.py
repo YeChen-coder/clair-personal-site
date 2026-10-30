@@ -18,7 +18,10 @@ build.mkdir(parents=True)
 subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "--target", str(build),
                 "--platform", "manylinux2014_aarch64", "--implementation", "cp", "--python-version", "3.13",
                 "--only-binary=:all:", "-r", str(root / "agent" / "requirements.txt")], check=True)
-shutil.copy(root / "agent" / "main.py", build / "main.py")
+for source in (root / "agent").glob("*.py"):  # main.py and its modules
+    shutil.copy(source, build / source.name)
+# The job-fit workflow grades evidence against Clair's profile: the site's hand-written llms.txt.
+shutil.copy(root.parent / "llms.txt", build / "profile.txt")
 
 tmp = root / ".build" / "agent.zip"
 with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as z:

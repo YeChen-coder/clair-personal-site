@@ -3,7 +3,7 @@
 // Runtime (CHAT_BACKEND = "agentcore") or, as a fallback, to the chat Lambda ("lambda");
 // /api/warm always goes to the Lambda, which wakes the database.
 const API_PATHS = new Set(["/api/chat", "/api/warm"]);
-const MAX_BODY = 12000;
+const MAX_BODY = 24000; // a pasted job description plus recent history
 
 export default {
   async fetch(request, env) {

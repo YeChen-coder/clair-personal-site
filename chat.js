@@ -4,36 +4,40 @@
     zh: {
       open: "问问 Clair 的 AI",
       title: "关于 Clair，随便问",
-      note: "AI 根据 Clair 的公开项目和网站内容回答，可能出错。",
+      note: "AI 根据 Clair 的公开项目和网站内容回答，可能出错。可以贴一份 JD，看看 Clair 和职位的匹配度。",
       placeholder: "比如：Clair 做过哪些 RAG 项目？",
       send: "发送",
       close: "关闭",
       thinking: "正在翻资料…",
       waking: "数据库刚睡醒，第一次回答要多等十几秒…",
+      long: "还在处理。JD 匹配会逐条查证，最多需要一分钟左右…",
+      jdPlaceholder: "把职位描述（JD）整段粘贴到这里，然后发送…",
       sources: "参考：",
       limited: "问得太快啦，等一分钟再试。",
       daily: "今天的提问额度用完了，明天再来，或者直接去 GitHub 看看。",
       error: "出了点问题，稍后再试。",
       ticket: "留言编号：",
       photoAlt: "Clair 的猫",
-      chips: ["Clair 做过哪些 RAG 项目？", "Clair 用过哪些 AWS 服务？", "看看 Clair 的猫", "给 Clair 留言"],
+      chips: ["Clair 做过哪些 RAG 项目？", { label: "用 JD 做匹配分析", paste: true }, "看看 Clair 的猫", "给 Clair 留言"],
     },
     en: {
       open: "Ask Clair's AI",
       title: "Ask anything about Clair",
-      note: "Answers come from Clair's public projects and this site. The AI can be wrong.",
+      note: "Answers come from Clair's public projects and this site. The AI can be wrong. Paste a job description to see how Clair fits.",
       placeholder: "e.g. What RAG projects has Clair built?",
       send: "Send",
       close: "Close",
       thinking: "Looking through the notes…",
       waking: "The database is waking up; the first answer takes ~15 seconds…",
+      long: "Still working. A job-fit check verifies each requirement and can take up to a minute…",
+      jdPlaceholder: "Paste the whole job description here, then send…",
       sources: "Sources: ",
       limited: "Too many questions at once. Try again in a minute.",
       daily: "Today's question quota is used up. Come back tomorrow, or browse GitHub.",
       error: "Something went wrong. Please try again later.",
       ticket: "Message ticket: ",
       photoAlt: "One of Clair's cats",
-      chips: ["What RAG projects has Clair built?", "Which AWS services has Clair used?", "Show me Clair's cats", "Leave a message for Clair"],
+      chips: ["What RAG projects has Clair built?", { label: "Match Clair to a job description", paste: true }, "Show me Clair's cats", "Leave a message for Clair"],
     },
   };
   const lang = () => (document.documentElement.lang || "").startsWith("zh") ? "zh" : "en";
@@ -53,7 +57,7 @@
       <div class="chat-log" aria-live="polite"></div>
       <div class="chat-chips"></div>
       <form class="chat-form">
-        <textarea class="chat-input" rows="1" maxlength="500" required></textarea>
+        <textarea class="chat-input" rows="1" maxlength="6000" required></textarea>
         <button type="submit" class="chat-send"></button>
       </form>
       <p class="chat-note"></p>
@@ -80,12 +84,18 @@
     panel.setAttribute("aria-label", t("title"));
     input.placeholder = t("placeholder");
     send.textContent = t("send");
-    chips.replaceChildren(...t("chips").map((q) => {
+    chips.replaceChildren(...t("chips").map((chip) => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "chat-chip";
-      b.textContent = q;
-      b.addEventListener("click", () => ask(q));
+      b.textContent = chip.label || chip;
+      // A "paste" chip doesn't send anything: it asks for the job description in the input box.
+      b.addEventListener("click", () => {
+        if (!chip.paste) return ask(chip);
+        input.placeholder = t("jdPlaceholder");
+        input.rows = 4;
+        input.focus();
+      });
       return b;
     }));
     chips.hidden = history.length > 0;
@@ -186,6 +196,7 @@
     const pending = bubble("bot", t("thinking"));
     pending.classList.add("is-pending");
     const slow = setTimeout(() => { pending.textContent = t("waking"); }, 5000);
+    const slower = setTimeout(() => { pending.textContent = t("long"); }, 20000);
     try {
       let res;
       for (let attempt = 0; attempt < 2; attempt++) {
@@ -215,6 +226,9 @@
       pending.textContent = t("error");
     } finally {
       clearTimeout(slow);
+      clearTimeout(slower);
+      input.rows = 1;
+      input.placeholder = t("placeholder");
       busy = false;
       send.disabled = false;
       log.scrollTop = log.scrollHeight;

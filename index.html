@@ -12,6 +12,31 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="chat.css">
   <link rel="icon" href="assets/avatar.jpg" type="image/jpeg">
+  <!-- For AI assistants and crawlers: a plain-text profile (llms.txt, built by aws/scripts/build_llms.mjs) and structured data -->
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="Profile for AI assistants (llms.txt)">
+  <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Full profile, plain text">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Clair Y.Chen",
+    "url": "https://clair-chen.yechenworking.workers.dev/",
+    "image": "https://clair-chen.yechenworking.workers.dev/assets/avatar.jpg",
+    "description": "Builds cloud and AI systems that connect software to real devices. Former Azure engineer (Microsoft via Wicresoft); Master of Engineering, McMaster University.",
+    "sameAs": ["https://github.com/YeChen-coder"],
+    "alumniOf": [
+      { "@type": "CollegeOrUniversity", "name": "McMaster University" },
+      { "@type": "CollegeOrUniversity", "name": "China University of Geosciences, Beijing" }
+    ],
+    "hasCredential": [
+      { "@type": "EducationalOccupationalCredential", "name": "AWS Certified Machine Learning – Specialty" },
+      { "@type": "EducationalOccupationalCredential", "name": "AWS Certified Cloud Practitioner" },
+      { "@type": "EducationalOccupationalCredential", "name": "Project Management Professional (PMP)" }
+    ],
+    "knowsAbout": ["AWS", "Amazon Bedrock", "AI agents", "Retrieval-augmented generation", "Realtime voice AI", "Azure", "Serverless"],
+    "subjectOf": { "@type": "WebPage", "url": "https://clair-chen.yechenworking.workers.dev/llms-full.txt" }
+  }
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main" data-i18n="skip">Skip to main content</a>
