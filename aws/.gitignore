@@ -1,0 +1,10 @@
+# Build output and generated files
+.build/
+infra/.app.packaged.yaml
+knowledge/site/
+sync-result.json
+__pycache__/
+# Personal photos and local notes (account IDs, resume notes) stay on this machine
+cats/*
+!cats/cats.example.json
+notes/

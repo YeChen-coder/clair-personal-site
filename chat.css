@@ -112,6 +112,14 @@
   white-space: normal;
 }
 .chat-sources a, .chat-bot a { color: var(--gold); }
+.chat-photo {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  margin-top: 0.5rem;
+  border-radius: 10px;
+  object-fit: cover;
+}
 
 .chat-chips {
   display: flex;

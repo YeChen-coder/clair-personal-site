@@ -8,10 +8,12 @@ binding = "ASSETS"
 not_found_handling = "single-page-application"
 run_worker_first = ["/api/*"]
 
-# Chat backend (AWS Lambda, see CloudAIAgentDemo). AWS_ACCESS_KEY_ID and
-# AWS_SECRET_ACCESS_KEY are Worker secrets: `npx wrangler secret put <NAME>`.
+# Chat backend (AWS, see aws/README.md). AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
+# CHAT_FUNCTION_URL and AGENT_RUNTIME_ARN are Worker secrets: `npx wrangler secret put <NAME>`.
+# CHAT_BACKEND: "agentcore" = the agent on AgentCore Runtime; "lambda" = the older single Lambda
+# (fallback: set it back and redeploy). /api/warm always uses the Lambda.
 [vars]
-CHAT_FUNCTION_URL = "https://oxech4jzfhwrkpdvl3gz5nwdna0jhbul.lambda-url.us-east-1.on.aws/"
+CHAT_BACKEND = "agentcore"
 AWS_REGION = "us-east-1"
 
 # Per-visitor limits (by IP): 6 questions and 3 wake-ups per minute.

@@ -10,3 +10,4 @@ _readme_translation_work
 .dev.vars*
 node_modules
 .gitignore
+aws

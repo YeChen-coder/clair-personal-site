@@ -1,5 +1,7 @@
-// Static site plus one small API: /api/chat and /api/warm are rate-limited here and
-// forwarded to the AWS chat Lambda, signed with SigV4 so only this Worker can call it.
+// Static site plus one small API: /api/chat and /api/warm are rate-limited here and forwarded to
+// AWS, signed with SigV4 so only this Worker can call it. /api/chat goes to the agent on AgentCore
+// Runtime (CHAT_BACKEND = "agentcore") or, as a fallback, to the chat Lambda ("lambda");
+// /api/warm always goes to the Lambda, which wakes the database.
 const API_PATHS = new Set(["/api/chat", "/api/warm"]);
 const MAX_BODY = 12000;
 
@@ -23,9 +25,10 @@ async function api(request, env, url) {
   const body = await request.text();
   if (body.length > MAX_BODY) return json(413, { error: "too_large" });
 
-  const target = new URL(url.pathname.replace(/^\/api/, ""), env.CHAT_FUNCTION_URL);
   try {
-    const res = await signedPost(target, body, env);
+    if (url.pathname === "/api/chat" && env.CHAT_BACKEND === "agentcore") return await agent(body, ip, env);
+    const target = new URL(url.pathname.replace(/^\/api/, ""), env.CHAT_FUNCTION_URL);
+    const res = await signedPost(target, body, env, "lambda");
     return new Response(res.body, {
       status: res.status,
       headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
@@ -35,6 +38,22 @@ async function api(request, env, url) {
   }
 }
 
+// AgentCore Runtime InvokeAgentRuntime. One runtime session per visitor IP (hashed), so a visitor's
+// follow-ups reuse a warm session; the conversation itself still travels in the request body.
+async function agent(body, ip, env) {
+  const region = env.AWS_REGION || "us-east-1";
+  const target = new URL(`https://bedrock-agentcore.${region}.amazonaws.com/runtimes/` +
+    `${encodeURIComponent(env.AGENT_RUNTIME_ARN)}/invocations?qualifier=DEFAULT`);
+  const session = "visitor-" + await sha256(`clair-chat:${ip}`);
+  const res = await signedPost(target, body, env, "bedrock-agentcore",
+    { "x-amzn-bedrock-agentcore-runtime-session-id": session });
+  if (!res.ok) return json(res.status === 429 ? 429 : 502, { error: "upstream" });
+  // The agent always answers 200 and puts its own status, if any, in the body.
+  const data = await res.json().catch(() => ({ error: "upstream", status: 502 }));
+  const { status = 200, ...payload } = data;
+  return json(status, payload);
+}
+
 function json(status, payload) {
   return new Response(JSON.stringify(payload), {
     status,
@@ -42,7 +61,7 @@ function json(status, payload) {
   });
 }
 
-// ---- AWS Signature Version 4, just enough for a Lambda function URL POST ----
+// ---- AWS Signature Version 4, just enough for a JSON POST to Lambda or AgentCore ----
 
 const enc = new TextEncoder();
 const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -53,7 +72,11 @@ async function hmac(key, data) {
   return crypto.subtle.sign("HMAC", k, enc.encode(data));
 }
 
-async function signedPost(target, body, env) {
+// RFC 3986 encoding; applied to an already-encoded path segment it double-encodes, as SigV4 expects
+// for every service except S3.
+const rfc3986 = (s) => encodeURIComponent(s).replace(/[!'()*]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase());
+
+async function signedPost(target, body, env, service, extraHeaders = {}) {
   const region = env.AWS_REGION || "us-east-1";
   const amzDate = new Date().toISOString().replace(/[:-]|\.\d{3}/g, "");
   const day = amzDate.slice(0, 8);
@@ -63,17 +86,19 @@ async function signedPost(target, body, env) {
     host: target.host,
     "x-amz-content-sha256": payloadHash,
     "x-amz-date": amzDate,
+    ...extraHeaders,
   };
   const names = Object.keys(headers).sort();
+  const query = [...target.searchParams].map(([k, v]) => `${rfc3986(k)}=${rfc3986(v)}`).sort().join("&");
   const canonical = [
-    "POST", target.pathname, "",
+    "POST", target.pathname.split("/").map(rfc3986).join("/"), query,
     names.map((n) => `${n}:${headers[n]}\n`).join(""),
     names.join(";"), payloadHash,
   ].join("\n");
-  const scope = `${day}/${region}/lambda/aws4_request`;
+  const scope = `${day}/${region}/${service}/aws4_request`;
   const toSign = ["AWS4-HMAC-SHA256", amzDate, scope, await sha256(canonical)].join("\n");
   let key = await hmac(`AWS4${env.AWS_SECRET_ACCESS_KEY}`, day);
-  for (const part of [region, "lambda", "aws4_request"]) key = await hmac(key, part);
+  for (const part of [region, service, "aws4_request"]) key = await hmac(key, part);
   const signature = hex(await hmac(key, toSign));
   headers.authorization = `AWS4-HMAC-SHA256 Credential=${env.AWS_ACCESS_KEY_ID}/${scope}, ` +
     `SignedHeaders=${names.join(";")}, Signature=${signature}`;

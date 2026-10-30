@@ -1,0 +1,90 @@
+{
+  "_about": "repos: extra files per repo beyond root READMEs (root README*.md of every public repo are always included). whole_repos: every .md in the repo except the listed excludes.",
+  "repos": {
+    "clair-personal-site": [
+      "aws/README.md"
+    ],
+    "SpecterSaysHi": [
+      "TECHNICAL_GUIDE.md",
+      "feathertalk_qinche_runtime/README.zh-CN.md"
+    ],
+    "JesusSaysHi": [
+      "ROADMAP.md",
+      "eval/results.md",
+      "eval/ragflow_results.md",
+      "eval/replies_results.md",
+      "eval/fidelity_comparison.md",
+      "eval/fidelity_results.md",
+      "eval/crisis_results.md",
+      "feathertalk_jesus_20261021/README.zh-CN.md",
+      "Jesus_material/muse_video_20261021/README.zh-CN.md",
+      "Jesus_material/frontal_base_20261021/README.zh-CN.md"
+    ],
+    "GPTSaysHi": [
+      "docs/ENGINEERING.md",
+      "docs/ENGINEERING-20261013.md",
+      "docs/QINCHE-20261019.md",
+      "docs/VALIDATION.md"
+    ],
+    "EBOBotQwenRealtime": [
+      "IMPLEMENTATION_PLAN.md",
+      "docs/memory-plan.md"
+    ],
+    "EBOBotToDigitalPet": [
+      "ArchitecureNote.md",
+      "ShootToTheAWSCloud_en.md",
+      "ShootToTheAWSCloud_zh.md",
+      "WhatILearnedFromIt.md",
+      "VERSION-GUIDE.md",
+      "ebo-ai-home/docs/COMPLETE-VERSION-INTRO.en.md",
+      "ebo-ai-home/docs/COMPLETE-VERSION-INTRO.zh-CN.md",
+      "ebo-ai-home/docs/realtime-assistant-plan.zh-CN.md",
+      "ebo-ai-home/docs/realtime-session-env.zh-CN.md",
+      "ebo-ai-home/docs/streaming-barge-in.zh-CN.md",
+      "ebo-ai-home/docs/barge-in-echo-handoff.zh-CN.md",
+      "ebo-ai-home/docs/audio-listen-health.zh-CN.md",
+      "ebo-ai-home/incident-response/2026-09-16-realtime-assistant-source-audio/incident-report.en.md",
+      "ebo-ai-home/incident-response/2026-09-16-realtime-assistant-source-audio/incident-report.zh-CN.md",
+      "ebo-ai-home/ops/diagnostics/README.zh-CN.md",
+      "ebo-ai-home/ops/diagnostics/AWS.zh-CN.md",
+      "ebo-ai-home/ops/diagnostics/HEALTH-REPORT.zh-CN.md",
+      "ebo-ai-home/ops/diagnostics/SAMPLING.zh-CN.md",
+      "ebo-ai-home/ops/diagnostics/PLAN.zh-CN.md",
+      "ebo-ai-home/ops/diagnostics/RUNTIME-VALIDATION.zh-CN.md"
+    ],
+    "EboBotOnAWSCloud": [
+      "EBO_Fargate_Architecture_and_Local_Diagnostic_Agent_Report.en.md",
+      "EBO_Fargate架构与诊断Agent调研报告.md",
+      "AWS成本估算_2026-09-10.md",
+      "Fargate内存降配评估_2026-09-12.md",
+      "cloud/部署验收记录.md",
+      "cloud/权限与部署确认.md",
+      "cloud/CloudWatch对话日志查看指南.md"
+    ],
+    "tianjin-chem-bank": [
+      "NOTE.md",
+      "给妈妈的AI组卷V2/README.md",
+      "给妈妈的AI组卷V2/WORD_LATEX_REFACTOR_PLAN.md",
+      "给妈妈的AI组卷V2/LATEX_HANDOFF.md",
+      "给妈妈的AI组卷V2/docs/word-latex/INTEGRATION_STATUS.md",
+      "给妈妈的AI组卷V2/docs/word-latex/PUBLIC_API.md",
+      "docs/validation.md",
+      "docs/天津化学研究与改进.md",
+      "docs/本次发布与题库定向修复.md",
+      "docs/试卷批量补答案与逐小问核对.md",
+      "docs/AI补答案诊断与迭代.md",
+      "docs/AI改题答案与双服务实测.md",
+      "docs/GLM性能与图片问题排查.md",
+      "docs/GLM新手礼包与FlashX.md",
+      "docs/Grokbot接入与交接.md"
+    ]
+  },
+  "whole_repos": {
+    "LLMKnowledgeNoteAndImplementation": {
+      "exclude": [
+        "AnthropicAIFluencyNote.md",
+        "ClaudeCodeBlog.md"
+      ]
+    }
+  }
+}

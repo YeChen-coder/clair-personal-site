@@ -14,7 +14,9 @@
       limited: "问得太快啦，等一分钟再试。",
       daily: "今天的提问额度用完了，明天再来，或者直接去 GitHub 看看。",
       error: "出了点问题，稍后再试。",
-      chips: ["Clair 做过哪些 RAG 项目？", "Clair 用过哪些 AWS 服务？", "介绍一下 SpecterSaysHi"],
+      ticket: "留言编号：",
+      photoAlt: "Clair 的猫",
+      chips: ["Clair 做过哪些 RAG 项目？", "Clair 用过哪些 AWS 服务？", "看看 Clair 的猫", "给 Clair 留言"],
     },
     en: {
       open: "Ask Clair's AI",
@@ -29,7 +31,9 @@
       limited: "Too many questions at once. Try again in a minute.",
       daily: "Today's question quota is used up. Come back tomorrow, or browse GitHub.",
       error: "Something went wrong. Please try again later.",
-      chips: ["What RAG projects has Clair built?", "Which AWS services has Clair used?", "Tell me about SpecterSaysHi"],
+      ticket: "Message ticket: ",
+      photoAlt: "One of Clair's cats",
+      chips: ["What RAG projects has Clair built?", "Which AWS services has Clair used?", "Show me Clair's cats", "Leave a message for Clair"],
     },
   };
   const lang = () => (document.documentElement.lang || "").startsWith("zh") ? "zh" : "en";
@@ -150,6 +154,28 @@
     el.appendChild(p);
   }
 
+  // Only photos served from the site's own AWS bucket are shown.
+  function addPhoto(el, image) {
+    if (!image?.url) return;
+    let url;
+    try { url = new URL(image.url); } catch { return; }
+    if (url.protocol !== "https:" || !url.hostname.endsWith(".amazonaws.com")) return;
+    const img = document.createElement("img");
+    img.className = "chat-photo";
+    img.alt = t("photoAlt");
+    img.src = url.href;
+    img.addEventListener("load", () => { log.scrollTop = log.scrollHeight; });
+    el.appendChild(img);
+  }
+
+  function addTicket(el, ticket) {
+    if (!ticket) return;
+    const p = document.createElement("p");
+    p.className = "chat-sources";
+    p.textContent = t("ticket") + ticket;
+    el.appendChild(p);
+  }
+
   async function ask(question) {
     question = question.trim();
     if (!question || busy) return;
@@ -174,6 +200,8 @@
       pending.classList.remove("is-pending");
       if (res.ok && data.answer) {
         setAnswer(pending, data.answer);
+        addPhoto(pending, data.image);
+        addTicket(pending, data.ticket);
         addSources(pending, data.sources);
         history.push({ role: "user", text: question }, { role: "assistant", text: data.answer });
       } else {

@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  clair-chat data layer: the S3 bucket the knowledge base reads, an Aurora PostgreSQL
+  Serverless v2 cluster (pgvector) that pauses at 0 ACU when idle, and a DynamoDB
+  table holding the daily chat counter.
+
+Parameters:
+  Prefix:
+    Type: String
+    Default: clair-chat
+  MaxAcu:
+    Type: Number
+    Default: 1
+    Description: Hard ceiling on database size; 1 ACU is ~$0.12/hour while awake.
+  PauseAfterSeconds:
+    Type: Number
+    Default: 300
+
+Resources:
+  DocsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${Prefix}-docs-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
+
+  DbCluster:
+    Type: AWS::RDS::DBCluster
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      DBClusterIdentifier: !Sub "${Prefix}-db"
+      Engine: aurora-postgresql
+      EngineVersion: "16.9"
+      DatabaseName: clairchat
+      MasterUsername: postgres
+      ManageMasterUserPassword: true
+      EnableHttpEndpoint: true          # RDS Data API: how Bedrock and the Lambda talk to it
+      StorageEncrypted: true
+      BackupRetentionPeriod: 1
+      DeletionProtection: false
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: 0                  # 0 ACU = auto-pause, no compute charge while idle
+        MaxCapacity: !Ref MaxAcu
+        SecondsUntilAutoPause: !Ref PauseAfterSeconds
+
+  DbInstance:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      DBInstanceIdentifier: !Sub "${Prefix}-db-1"
+      DBClusterIdentifier: !Ref DbCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+      PubliclyAccessible: false
+
+  CounterTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${Prefix}-counter"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: pk, AttributeType: S }
+      KeySchema:
+        - { AttributeName: pk, KeyType: HASH }
+      TimeToLiveSpecification:
+        AttributeName: expires
+        Enabled: true
+
+Outputs:
+  BucketName:
+    Value: !Ref DocsBucket
+  ClusterArn:
+    Value: !GetAtt DbCluster.DBClusterArn
+  SecretArn:
+    Value: !GetAtt DbCluster.MasterUserSecret.SecretArn
+  CounterTableName:
+    Value: !Ref CounterTable

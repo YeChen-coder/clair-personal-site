@@ -1,0 +1,637 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  clair-chat app layer: Bedrock knowledge base over the Aurora table, the triage-agent
+  Lambda (knowledge search, cat photos, visitor messages) behind an IAM-auth function URL, the IAM user the Cloudflare Worker signs with, and
+  a monthly account budget whose action cuts off Bedrock and the function at 100%.
+
+Parameters:
+  Prefix:
+    Type: String
+    Default: clair-chat
+  BucketName:
+    Type: String
+  ClusterArn:
+    Type: String
+  SecretArn:
+    Type: String
+  CounterTableName:
+    Type: String
+  DbName:
+    Type: String
+    Default: clairchat
+  ModelId:
+    Type: String
+    Default: us.anthropic.claude-haiku-4-5-20251001-v1:0
+  ModelName:
+    Type: String
+    Default: anthropic.claude-haiku-4-5-20251001-v1:0
+  DailyLimit:
+    Type: Number
+    Default: 80
+  BudgetUsd:
+    Type: Number
+    Default: 10
+  AlertEmail:
+    Type: String
+  AgentCodeKey:
+    Type: String
+    Description: S3 key (in BucketName) of the agent zip built by scripts/build_agent.py
+
+Resources:
+  # ---------- knowledge base ----------
+  KbRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${Prefix}-kb-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: bedrock.amazonaws.com }
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals: { "aws:SourceAccount": !Ref AWS::AccountId }
+      Policies:
+        - PolicyName: kb-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: bedrock:InvokeModel
+                Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v2:0"
+              - Effect: Allow
+                Action: rds:DescribeDBClusters
+                Resource: !Ref ClusterArn
+              - Effect: Allow
+                Action: [rds-data:ExecuteStatement, rds-data:BatchExecuteStatement]
+                Resource: !Ref ClusterArn
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref SecretArn
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !Sub "arn:aws:s3:::${BucketName}"
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "arn:aws:s3:::${BucketName}/knowledge/*"
+
+  KnowledgeBase:
+    Type: AWS::Bedrock::KnowledgeBase
+    Properties:
+      Name: !Sub "${Prefix}-kb"
+      RoleArn: !GetAtt KbRole.Arn
+      KnowledgeBaseConfiguration:
+        Type: VECTOR
+        VectorKnowledgeBaseConfiguration:
+          EmbeddingModelArn: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v2:0"
+          EmbeddingModelConfiguration:
+            BedrockEmbeddingModelConfiguration:
+              Dimensions: 1024
+              EmbeddingDataType: FLOAT32
+      StorageConfiguration:
+        Type: RDS
+        RdsConfiguration:
+          ResourceArn: !Ref ClusterArn
+          CredentialsSecretArn: !Ref SecretArn
+          DatabaseName: !Ref DbName
+          TableName: bedrock_integration.bedrock_kb
+          FieldMapping:
+            PrimaryKeyField: id
+            VectorField: embedding
+            TextField: chunks
+            MetadataField: metadata
+            CustomMetadataField: custom_metadata
+
+  DataSource:
+    Type: AWS::Bedrock::DataSource
+    Properties:
+      KnowledgeBaseId: !Ref KnowledgeBase
+      Name: !Sub "${Prefix}-docs"
+      DataDeletionPolicy: DELETE
+      DataSourceConfiguration:
+        Type: S3
+        S3Configuration:
+          BucketArn: !Sub "arn:aws:s3:::${BucketName}"
+          InclusionPrefixes: ["knowledge/"]
+      VectorIngestionConfiguration:
+        ChunkingConfiguration:
+          ChunkingStrategy: FIXED_SIZE
+          FixedSizeChunkingConfiguration:
+            MaxTokens: 400
+            OverlapPercentage: 15
+
+  # ---------- visitor messages: one item per ticket, plus an email to the owner ----------
+  MessagesTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain            # messages outlive a teardown of the stack
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${Prefix}-messages"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: pk, AttributeType: S }
+      KeySchema:
+        - { AttributeName: pk, KeyType: HASH }
+
+  MessageTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${Prefix}-messages"
+
+  MessageSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref MessageTopic
+      Protocol: email
+      Endpoint: !Ref AlertEmail       # AWS sends a confirmation mail; click it once
+
+  # ---------- chat function ----------
+  FunctionLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Prefix}"
+      RetentionInDays: 14
+
+  FunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${Prefix}-function-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: chat-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt FunctionLogs.Arn
+              - Effect: Allow
+                Action: bedrock:Retrieve
+                Resource: !GetAtt KnowledgeBase.KnowledgeBaseArn
+              - Effect: Allow
+                Action: bedrock:InvokeModel
+                Resource:
+                  - !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${ModelId}"
+                  - !Sub "arn:aws:bedrock:*::foundation-model/${ModelName}"
+              - Effect: Allow
+                Action: rds-data:ExecuteStatement
+                Resource: !Ref ClusterArn
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref SecretArn
+              - Effect: Allow
+                Action: dynamodb:UpdateItem
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CounterTableName}"
+              - Effect: Allow
+                Action: dynamodb:PutItem
+                Resource: !GetAtt MessagesTable.Arn
+              - Effect: Allow
+                Action: sns:Publish
+                Resource: !Ref MessageTopic
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "arn:aws:s3:::${BucketName}/cats/*"
+
+  Function:
+    Type: AWS::Lambda::Function
+    DependsOn: FunctionLogs
+    Properties:
+      FunctionName: !Ref Prefix
+      Runtime: python3.13
+      Handler: handler.lambda_handler
+      Code: ../lambda
+      Role: !GetAtt FunctionRole.Arn
+      Timeout: 60
+      MemorySize: 256
+      Environment:
+        Variables:
+          KB_ID: !Ref KnowledgeBase
+          MODEL_ID: !Ref ModelId
+          CLUSTER_ARN: !Ref ClusterArn
+          SECRET_ARN: !Ref SecretArn
+          DB_NAME: !Ref DbName
+          COUNTER_TABLE: !Ref CounterTableName
+          DAILY_LIMIT: !Ref DailyLimit
+          BUCKET: !Ref BucketName
+          MESSAGES_TABLE: !Ref MessagesTable
+          TOPIC_ARN: !Ref MessageTopic
+
+  FunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt Function.Arn
+      AuthType: AWS_IAM
+      InvokeMode: BUFFERED
+
+  # ---------- step 2: tools behind an AgentCore Gateway, agent hosted on AgentCore Runtime ----------
+  ToolsLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Prefix}-tools"
+      RetentionInDays: 14
+
+  ToolsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${Prefix}-tools-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: tools-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt ToolsLogs.Arn
+              - Effect: Allow
+                Action: bedrock:Retrieve
+                Resource: !GetAtt KnowledgeBase.KnowledgeBaseArn
+              - Effect: Allow
+                Action: rds-data:ExecuteStatement
+                Resource: !Ref ClusterArn
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref SecretArn
+              - Effect: Allow
+                Action: dynamodb:UpdateItem
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CounterTableName}"
+              - Effect: Allow
+                Action: dynamodb:PutItem
+                Resource: !GetAtt MessagesTable.Arn
+              - Effect: Allow
+                Action: sns:Publish
+                Resource: !Ref MessageTopic
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "arn:aws:s3:::${BucketName}/cats/*"
+
+  ToolsFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: ToolsLogs
+    Properties:
+      FunctionName: !Sub "${Prefix}-tools"
+      Runtime: python3.13
+      Handler: handler.lambda_handler
+      Code: ../tools
+      Role: !GetAtt ToolsRole.Arn
+      Timeout: 60
+      MemorySize: 256
+      Environment:
+        Variables:
+          KB_ID: !Ref KnowledgeBase
+          CLUSTER_ARN: !Ref ClusterArn
+          SECRET_ARN: !Ref SecretArn
+          DB_NAME: !Ref DbName
+          COUNTER_TABLE: !Ref CounterTableName
+          BUCKET: !Ref BucketName
+          MESSAGES_TABLE: !Ref MessagesTable
+          TOPIC_ARN: !Ref MessageTopic
+
+  GatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${Prefix}-gateway-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: bedrock-agentcore.amazonaws.com }
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals: { "aws:SourceAccount": !Ref AWS::AccountId }
+              ArnLike: { "aws:SourceArn": !Sub "arn:aws:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:gateway/*" }
+      Policies:
+        - PolicyName: invoke-tools
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt ToolsFunction.Arn
+
+  Gateway:
+    Type: AWS::BedrockAgentCore::Gateway
+    Properties:
+      Name: !Sub "${Prefix}-gateway"
+      Description: Tools of the Ask-Clair agent (knowledge search, cat photos, messages)
+      ProtocolType: MCP
+      AuthorizerType: AWS_IAM
+      RoleArn: !GetAtt GatewayRole.Arn
+
+  GatewayTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !GetAtt Gateway.GatewayIdentifier
+      Name: clair-tools
+      CredentialProviderConfigurations:
+        - CredentialProviderType: GATEWAY_IAM_ROLE
+      TargetConfiguration:
+        Mcp:
+          Lambda:
+            LambdaArn: !GetAtt ToolsFunction.Arn
+            ToolSchema:
+              InlinePayload:
+                - Name: search_clair_kb
+                  Description: Search the knowledge base of Clair's public GitHub projects and website text.
+                  InputSchema:
+                    Type: object
+                    Properties:
+                      query: { Type: string, Description: "Standalone search query." }
+                    Required: [query]
+                - Name: get_cat_photo
+                  Description: >-
+                    Show a photo of one of Clair's cats. Returns the cat's name and a short bio; the image
+                    itself is attached to the reply automatically.
+                  InputSchema:
+                    Type: object
+                    Properties:
+                      cat: { Type: string, Description: "Name of the cat the visitor asked for. Omit for any cat." }
+                - Name: leave_message
+                  Description: Save a message from the visitor for Clair (creates a ticket and emails Clair).
+                  InputSchema:
+                    Type: object
+                    Properties:
+                      message: { Type: string, Description: "What the visitor wants Clair to read, in their words." }
+                      contact: { Type: string, Description: "Visitor's email or other contact; empty if none." }
+                      name: { Type: string, Description: "Visitor's name, if given." }
+                    Required: [message]
+
+  AgentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${Prefix}-agent-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: bedrock-agentcore.amazonaws.com }
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals: { "aws:SourceAccount": !Ref AWS::AccountId }
+              ArnLike: { "aws:SourceArn": !Sub "arn:aws:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:*" }
+      Policies:
+        - PolicyName: agent-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:DescribeLogStreams, logs:CreateLogGroup, logs:DescribeLogGroups]
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*"
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/bedrock-agentcore/runtimes/*:log-stream:*"
+              - Effect: Allow
+                Action: [xray:PutTraceSegments, xray:PutTelemetryRecords, xray:GetSamplingRules, xray:GetSamplingTargets]
+                Resource: "*"
+              - Effect: Allow
+                Action: cloudwatch:PutMetricData
+                Resource: "*"
+                Condition:
+                  StringEquals: { "cloudwatch:namespace": bedrock-agentcore }
+              - Effect: Allow
+                Action: bedrock:InvokeModel
+                Resource:
+                  - !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${ModelId}"
+                  - !Sub "arn:aws:bedrock:*::foundation-model/${ModelName}"
+              - Effect: Allow
+                Action: bedrock-agentcore:InvokeGateway
+                Resource: !GetAtt Gateway.GatewayArn
+              - Effect: Allow
+                Action: dynamodb:UpdateItem
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CounterTableName}"
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "arn:aws:s3:::${BucketName}/artifacts/*"
+
+  AgentRuntime:
+    Type: AWS::BedrockAgentCore::Runtime
+    Properties:
+      AgentRuntimeName: clair_chat_agent
+      Description: Triage agent for the Ask-Clair chat; its tools come from the AgentCore Gateway
+      RoleArn: !GetAtt AgentRole.Arn
+      NetworkConfiguration:
+        NetworkMode: PUBLIC
+      LifecycleConfiguration:
+        IdleRuntimeSessionTimeout: 300
+        MaxLifetime: 900
+      AgentRuntimeArtifact:
+        CodeConfiguration:
+          Runtime: PYTHON_3_13
+          EntryPoint: [main.py]
+          Code:
+            S3:
+              Bucket: !Ref BucketName
+              Prefix: !Ref AgentCodeKey
+      EnvironmentVariables:
+        REGION: !Ref AWS::Region
+        MODEL_ID: !Ref ModelId
+        GATEWAY_URL: !GetAtt Gateway.GatewayUrl
+        COUNTER_TABLE: !Ref CounterTableName
+        DAILY_LIMIT: !Ref DailyLimit
+
+  # ---------- every two days: mirror GitHub docs into S3 and re-ingest what changed ----------
+  SyncLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Prefix}-sync"
+      RetentionInDays: 14
+
+  SyncRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${Prefix}-sync-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: sync-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt SyncLogs.Arn
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !Sub "arn:aws:s3:::${BucketName}"
+              - Effect: Allow
+                Action: [s3:PutObject, s3:DeleteObject]
+                Resource:
+                  - !Sub "arn:aws:s3:::${BucketName}/knowledge/github/*"
+                  - !Sub "arn:aws:s3:::${BucketName}/knowledge/docs/*"
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "arn:aws:s3:::${BucketName}/config/knowledge-docs.json"
+              - Effect: Allow
+                Action: bedrock:StartIngestionJob
+                Resource: !GetAtt KnowledgeBase.KnowledgeBaseArn
+              - Effect: Allow
+                Action: rds-data:ExecuteStatement
+                Resource: !Ref ClusterArn
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref SecretArn
+
+  SyncFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: SyncLogs
+    Properties:
+      FunctionName: !Sub "${Prefix}-sync"
+      Runtime: python3.13
+      Handler: handler.lambda_handler
+      Code: ../sync
+      Role: !GetAtt SyncRole.Arn
+      Timeout: 300
+      MemorySize: 256
+      Environment:
+        Variables:
+          BUCKET: !Ref BucketName
+          KB_ID: !Ref KnowledgeBase
+          DS_ID: !GetAtt DataSource.DataSourceId
+          CLUSTER_ARN: !Ref ClusterArn
+          SECRET_ARN: !Ref SecretArn
+          DB_NAME: !Ref DbName
+
+  SyncNoRetry:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName: !Ref SyncFunction
+      Qualifier: $LATEST
+      MaximumRetryAttempts: 0
+
+  SyncSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub "${Prefix}-sync-every-2-days"
+      ScheduleExpression: rate(2 days)
+      Targets:
+        - Id: sync
+          Arn: !GetAtt SyncFunction.Arn
+
+  SyncSchedulePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SyncFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt SyncSchedule.Arn
+
+  # ---------- the identity the Cloudflare Worker signs requests with ----------
+  WorkerUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Sub "${Prefix}-worker"
+      Policies:
+        - PolicyName: invoke-chat-only
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [lambda:InvokeFunctionUrl, lambda:InvokeFunction]
+                Resource: !GetAtt Function.Arn
+              - Effect: Allow
+                Action: bedrock-agentcore:InvokeAgentRuntime
+                Resource:
+                  - !GetAtt AgentRuntime.AgentRuntimeArn
+                  - !Sub "${AgentRuntime.AgentRuntimeArn}/runtime-endpoint/*"
+
+  # ---------- bill protection ----------
+  CutOffPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub "${Prefix}-budget-cutoff"
+      Description: Attached by the budget action when the monthly budget is used up.
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Deny
+            Action: [bedrock:*, bedrock-agentcore:*, lambda:InvokeFunctionUrl, lambda:InvokeFunction, rds-data:*]
+            Resource: "*"
+
+  BudgetActionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${Prefix}-budget-action-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: budgets.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: attach-cutoff
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [iam:AttachRolePolicy, iam:DetachRolePolicy, iam:AttachUserPolicy, iam:DetachUserPolicy]
+                Resource:
+                  - !GetAtt FunctionRole.Arn
+                  - !GetAtt SyncRole.Arn
+                  - !GetAtt AgentRole.Arn
+                  - !GetAtt ToolsRole.Arn
+                  - !GetAtt WorkerUser.Arn
+                Condition:
+                  ArnEquals: { "iam:PolicyARN": !Ref CutOffPolicy }
+
+  Budget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetName: !Sub "${Prefix}-monthly"
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit: { Amount: !Ref BudgetUsd, Unit: USD }
+      NotificationsWithSubscribers:
+        - Notification: { NotificationType: ACTUAL, ComparisonOperator: GREATER_THAN, Threshold: 50 }
+          Subscribers: [{ SubscriptionType: EMAIL, Address: !Ref AlertEmail }]
+        - Notification: { NotificationType: ACTUAL, ComparisonOperator: GREATER_THAN, Threshold: 80 }
+          Subscribers: [{ SubscriptionType: EMAIL, Address: !Ref AlertEmail }]
+        - Notification: { NotificationType: FORECASTED, ComparisonOperator: GREATER_THAN, Threshold: 100 }
+          Subscribers: [{ SubscriptionType: EMAIL, Address: !Ref AlertEmail }]
+
+  BudgetCutOff:
+    Type: AWS::Budgets::BudgetsAction
+    Properties:
+      BudgetName: !Ref Budget
+      NotificationType: ACTUAL
+      ActionType: APPLY_IAM_POLICY
+      ActionThreshold: { Type: PERCENTAGE, Value: 100 }
+      ExecutionRoleArn: !GetAtt BudgetActionRole.Arn
+      ApprovalModel: AUTOMATIC
+      Definition:
+        IamActionDefinition:
+          PolicyArn: !Ref CutOffPolicy
+          Roles: [!Ref FunctionRole, !Ref SyncRole, !Ref AgentRole, !Ref ToolsRole]
+          Users: [!Ref WorkerUser]
+      Subscribers:
+        - { Type: EMAIL, Address: !Ref AlertEmail }
+
+Outputs:
+  KnowledgeBaseId:
+    Value: !Ref KnowledgeBase
+  DataSourceId:
+    Value: !GetAtt DataSource.DataSourceId
+  FunctionUrl:
+    Value: !GetAtt FunctionUrl.FunctionUrl
+  WorkerUserName:
+    Value: !Ref WorkerUser
+  SyncFunctionName:
+    Value: !Ref SyncFunction
+  GatewayUrl:
+    Value: !GetAtt Gateway.GatewayUrl
+  AgentRuntimeArn:
+    Value: !GetAtt AgentRuntime.AgentRuntimeArn
