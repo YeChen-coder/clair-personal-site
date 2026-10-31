@@ -69,7 +69,7 @@ one tool that runs inside the agent instead of behind the Gateway, because it is
 orchestration of model calls that use the Gateway's knowledge search:
 
 ```
-triage agent ── analyze_job_fit ──▶ 1. extract    the requirements (≤ 10), as structured output
+triage agent ── analyze_job_fit ──▶ 1. extract    the requirements (≤ 12), as structured output
                                     2. research   per requirement, in parallel threads:
                                                   search_clair_kb via the Gateway, then a grader
                                                   call: strong / partial / none + one line of evidence
@@ -85,7 +85,11 @@ triage agent ── analyze_job_fit ──▶ 1. extract    the requirements (�
 - **No overclaiming**: the report may only use the grades; the verifier rejects anything the evidence
   does not back, and words like "production" or "expert" are rejected in code.
 - **The answer is the report**: it goes to the visitor unchanged, not through the triage model again.
-- **Cost**: about 13 model calls and roughly $0.06 per analysis, 15 to 25 seconds; capped at 10 per day.
+- **Follow-ups see every requirement**: the reply also carries `history_text`, the numbered list from
+  step 1. `chat.js` stores it in the chat history in place of the pasted job description, so later
+  questions get all requirements instead of the first part of a long posting (each past turn is cut
+  to 2,500 characters, `HISTORY_CHARS`).
+- **Cost**: about 15 model calls and roughly $0.07 per analysis, 15 to 25 seconds; capped at 10 per day.
   Each step is a span in the trace (`job_fit`, `job_fit research`).
 
 ## What the site deliberately does not do

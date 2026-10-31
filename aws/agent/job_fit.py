@@ -17,12 +17,12 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable
 
-MAX_REQUIREMENTS = 10
+MAX_REQUIREMENTS = 12
 
 EXTRACT_SYSTEM = """You read a job description that a visitor pasted into the chat on Clair Y.Chen's \
 portfolio site. Extract the requirements a hiring manager would check a candidate against: skills, \
 technologies, kinds of experience, and responsibilities that need proof. Merge near-duplicates and keep \
-at most 10, must-haves first. Keep every distinct area the role names, including nice-to-haves (for \
+at most 12, must-haves first. Keep every distinct area the role names, including nice-to-haves (for \
 example voice, customer-facing work, model training, certifications); merge only true duplicates. Write each \
 requirement without a number of years ("Python", not "3+ years of Python"). Ignore salary, benefits, \
 location, visa and company marketing. For each requirement also write a short search query for finding evidence of it in \
@@ -89,7 +89,7 @@ Use ONLY the graded evidence you are given. Never add skills, tools, numbers, em
 are not in it, and never upgrade a grade. Plain, factual tone: no superlatives or hype such as \
 "mastery", "expert", "production-grade", "exceptional", and never call personal projects production or \nenterprise systems (Chinese: 不要写“生产级”“生产项目”). The overall fit must follow the grades: strong only \
 if most must-haves are ✓, partial if several are ✗. Refer to Clair by name; never she/her/he/him (in Chinese write \
-"Clair", not 他/她). At most 260 words (Chinese: 420 characters)."""
+"Clair", not 他/她). At most 310 words (Chinese: 500 characters)."""
 
 VERIFY_SYSTEM = """You check a job-fit report against the graded evidence it was written from. List each \
 statement about Clair in the report that the evidence does not support: a skill, tool, number, employer \
@@ -194,7 +194,12 @@ def analyze(job_description: str, converse: Callable, search: Callable, profile:
             if s["url"] not in seen:
                 seen.add(s["url"])
                 sources.append(s)
-    return {"report": report, "sources": sources, "meta": {
+    # The extracted requirements stand in for the pasted job description in the chat history, so a
+    # follow-up question sees every requirement instead of the first part of a long posting.
+    lines = [f"[Job description{' for ' + spec['role'] if spec.get('role') else ''}: "
+             f"{len(requirements)} requirements extracted]"]
+    lines += [f"{i}. ({r.get('importance', 'must')}) {r['text']}" for i, r in enumerate(requirements, 1)]
+    return {"report": report, "sources": sources, "requirements_text": "\n".join(lines), "meta": {
         "requirements": len(graded), "verdicts": [g["verdict"] for g in graded],
         "write_attempts": attempts, "fallback": bool(problems) and attempts == 2}}
 

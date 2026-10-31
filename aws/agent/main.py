@@ -50,6 +50,7 @@ COUNTER_TABLE = os.environ["COUNTER_TABLE"]
 DAILY_LIMIT = int(os.environ.get("DAILY_LIMIT", "80"))
 MAX_TOKENS = int(os.environ.get("MAX_TOKENS", "700"))
 MAX_STEPS = 4
+HISTORY_CHARS = 2500  # per past turn; a 12-line fit report fits whole. Must match chat.js.
 MAX_QUESTION = 6000  # long enough for a pasted job description
 JOB_FIT_DAILY_LIMIT = int(os.environ.get("JOB_FIT_DAILY_LIMIT", "10"))  # ~13 model calls each
 # Clair's profile: the site's hand-written llms.txt, copied into the code package by build_agent.py.
@@ -226,6 +227,7 @@ def run_job_fit(state: dict) -> str:
     print(json.dumps({"event": "job_fit", **result["meta"]}))
     state["final"] = result["report"]
     state["sources"] = result["sources"]
+    state["history_text"] = result["requirements_text"]
     return "The report has been shown to the visitor."
 
 
@@ -242,7 +244,7 @@ def chat(body: dict) -> dict:
     messages = []
     for h in history:
         role = "assistant" if h.get("role") == "assistant" else "user"
-        text = str(h.get("text", ""))[:1500]
+        text = str(h.get("text", ""))[:HISTORY_CHARS]
         if text and (not messages or messages[-1]["role"] != role):
             messages.append({"role": role, "content": [{"text": text}]})
     if messages and messages[0]["role"] != "user":
@@ -253,7 +255,7 @@ def chat(body: dict) -> dict:
 
     started = time.perf_counter()
     state = {"sources": [], "image": None, "ticket": None, "tools": [], "question": question.strip(),
-             "final": None, "usage": [0, 0], "lock": threading.Lock()}
+             "final": None, "history_text": None, "usage": [0, 0], "lock": threading.Lock()}
     answer = ""
     try:
         config, names = tool_config()
@@ -287,7 +289,10 @@ def chat(body: dict) -> dict:
     }))
     if not answer:
         return {"error": "empty", "status": 502}
-    return {"answer": answer, "sources": state["sources"][:6], "image": state["image"], "ticket": state["ticket"]}
+    reply = {"answer": answer, "sources": state["sources"][:6], "image": state["image"], "ticket": state["ticket"]}
+    if state["history_text"]:
+        reply["history_text"] = state["history_text"]  # chat.js keeps this instead of the pasted JD
+    return reply
 
 
 def bump(kind: str, limit: int) -> bool:

@@ -19,6 +19,8 @@
       ticket: "留言编号：",
       photoAlt: "Clair 的猫",
       chips: ["Clair 做过哪些 RAG 项目？", { label: "用 JD 做匹配分析", paste: true }, "看看 Clair 的猫", "给 Clair 留言"],
+      teaser: "嗨！可以问我 Clair 的项目、看看猫，或者贴一份 JD 测匹配度。",
+      teaserClose: "关闭提示",
     },
     en: {
       open: "Ask Clair's AI",
@@ -38,6 +40,8 @@
       ticket: "Message ticket: ",
       photoAlt: "One of Clair's cats",
       chips: ["What RAG projects has Clair built?", { label: "Match Clair to a job description", paste: true }, "Show me Clair's cats", "Leave a message for Clair"],
+      teaser: "Hi! Ask me about Clair's projects, see the cats, or paste a job description to check the fit.",
+      teaserClose: "Dismiss",
     },
   };
   const lang = () => (document.documentElement.lang || "").startsWith("zh") ? "zh" : "en";
@@ -46,8 +50,13 @@
   const root = document.createElement("div");
   root.className = "chat";
   root.innerHTML = `
+    <div class="chat-teaser" hidden>
+      <p class="chat-teaser-text"></p>
+      <button type="button" class="chat-teaser-close">×</button>
+    </div>
     <button type="button" class="chat-fab" aria-expanded="false" aria-controls="chatPanel">
-      <span class="chat-fab-dot" aria-hidden="true"></span><span class="chat-fab-label"></span>
+      <svg class="chat-fab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.2 3.6c-.5.4-1.3.1-1.3-.6V16A2.5 2.5 0 0 1 4 13.5z" fill="currentColor"/><circle cx="8.5" cy="9.5" r="1.2" fill="var(--accent)"/><circle cx="12" cy="9.5" r="1.2" fill="var(--accent)"/><circle cx="15.5" cy="9.5" r="1.2" fill="var(--accent)"/></svg>
+      <span class="chat-fab-label"></span>
     </button>
     <section class="chat-panel" id="chatPanel" role="dialog" aria-modal="false" hidden>
       <header class="chat-head">
@@ -77,6 +86,8 @@
 
   function label() {
     root.querySelector(".chat-fab-label").textContent = t("open");
+    root.querySelector(".chat-teaser-text").textContent = t("teaser");
+    root.querySelector(".chat-teaser-close").setAttribute("aria-label", t("teaserClose"));
     root.querySelector(".chat-title").textContent = t("title");
     root.querySelector(".chat-note").textContent = t("note");
     const close = root.querySelector(".chat-close");
@@ -116,8 +127,26 @@
       }
     }
   }
-  fab.addEventListener("click", () => toggle(panel.hidden));
+  fab.addEventListener("click", () => { hideTeaser(); toggle(panel.hidden); });
   root.querySelector(".chat-close").addEventListener("click", () => { toggle(false); fab.focus(); });
+  // Anything on the page with data-open-chat (the hero button) opens the panel.
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-open-chat]")) { e.preventDefault(); hideTeaser(); toggle(true); }
+  });
+
+  // One-time hint above the button, a few seconds after the first visit.
+  const TEASER_KEY = "clair-chat-teaser-seen";
+  const teaser = root.querySelector(".chat-teaser");
+  function teaserSeen() {
+    try { return localStorage.getItem(TEASER_KEY) === "1"; } catch { return false; }
+  }
+  function hideTeaser() {
+    teaser.hidden = true;
+    try { localStorage.setItem(TEASER_KEY, "1"); } catch { /* private mode: show again next time */ }
+  }
+  root.querySelector(".chat-teaser-close").addEventListener("click", hideTeaser);
+  teaser.querySelector(".chat-teaser-text").addEventListener("click", () => { hideTeaser(); toggle(true); });
+  if (!teaserSeen()) setTimeout(() => { if (panel.hidden) teaser.hidden = false; }, 2500);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !panel.hidden) { toggle(false); fab.focus(); } });
 
   function bubble(role, text) {
@@ -203,7 +232,9 @@
         res = await fetch("/api/chat", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ question, history: history.slice(-6) }),
+          // The agent reads at most 2,500 characters per past turn (HISTORY_CHARS in aws/agent/main.py),
+          // so don't resend more than that with every follow-up.
+          body: JSON.stringify({ question, history: history.slice(-6).map((h) => ({ ...h, text: h.text.slice(0, 2500) })) }),
         });
         if (res.status !== 503) break;
       }
@@ -214,7 +245,9 @@
         addPhoto(pending, data.image);
         addTicket(pending, data.ticket);
         addSources(pending, data.sources);
-        history.push({ role: "user", text: question }, { role: "assistant", text: data.answer });
+        // After a job-fit analysis the agent returns the extracted requirements; remembering those
+        // instead of the pasted job description keeps every requirement visible to follow-ups.
+        history.push({ role: "user", text: data.history_text || question }, { role: "assistant", text: data.answer });
       } else {
         pending.classList.add("is-error");
         pending.textContent = data.error === "daily_limit" ? t("daily")

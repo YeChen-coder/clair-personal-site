@@ -7,34 +7,102 @@
   font-family: var(--font-sans);
 }
 
+.chat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+/* The launcher: solid accent pill with an icon and a slow halo so it reads as the page's one live thing. */
 .chat-fab {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.75rem 1.1rem;
-  border: 1px solid var(--line);
+  gap: 0.6rem;
+  padding: 0.95rem 1.4rem 0.95rem 1.15rem;
+  border: 0;
   border-radius: 999px;
-  background: var(--card);
-  color: var(--ink);
-  font: 600 0.95rem var(--font-sans);
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-  transition: border-color 0.2s, transform 0.2s;
-}
-.chat-fab:hover { border-color: var(--accent-soft); transform: translateY(-1px); }
-.chat-fab:focus-visible, .chat-close:focus-visible, .chat-chip:focus-visible, .chat-send:focus-visible {
-  outline: 2px solid var(--accent-soft);
-  outline-offset: 2px;
-}
-.chat-fab-dot {
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 4px var(--accent-wash);
+  color: #fff;
+  font: 700 1.02rem var(--font-sans);
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 30px rgba(223, 79, 61, 0.45), var(--shadow-lg);
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
 }
-.chat.is-open .chat-fab { display: none; }
+.chat-fab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(223, 79, 61, 0.55);
+  animation: chat-halo 2.8s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes chat-halo {
+  0% { box-shadow: 0 0 0 0 rgba(223, 79, 61, 0.55); }
+  70%, 100% { box-shadow: 0 0 0 16px rgba(223, 79, 61, 0); }
+}
+.chat-fab:hover { background: var(--accent-soft); transform: translateY(-2px); box-shadow: 0 14px 36px rgba(223, 79, 61, 0.55), var(--shadow-lg); }
+.chat-fab:focus-visible, .chat-close:focus-visible, .chat-chip:focus-visible, .chat-send:focus-visible,
+.chat-teaser-close:focus-visible, .btn-ai:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.chat-fab-icon { width: 1.35rem; height: 1.35rem; flex: none; }
+.chat.is-open .chat-fab, .chat.is-open .chat-teaser { display: none; }
+
+/* One-time hint bubble above the launcher. */
+.chat-teaser {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-width: min(300px, calc(100vw - 2rem));
+  padding: 0.8rem 0.6rem 0.8rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line));
+  border-radius: 16px 16px 4px 16px;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-lg);
+  animation: chat-teaser-in 0.35s ease-out;
+}
+.chat-teaser[hidden] { display: none; }
+.chat-teaser-text {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--ink);
+  cursor: pointer;
+}
+.chat-teaser-close {
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-faint);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.chat-teaser-close:hover { color: var(--ink); background: var(--green-wash); }
+@keyframes chat-teaser-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Hero button that opens the chat (index.html, data-open-chat). */
+.btn-ai {
+  background: var(--gold-wash);
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-ai:hover { background: var(--gold); color: var(--bg); }
+.btn-ai svg { width: 1.1rem; height: 1.1rem; }
 
 .chat-panel {
   display: flex;
@@ -183,6 +251,11 @@
   .chat-panel { width: 100%; height: min(78vh, 600px); }
 }
 
+@media (max-width: 600px) {
+  .chat-fab { padding: 0.85rem 1.15rem 0.85rem 1rem; font-size: 0.95rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .chat-fab { transition: none; }
+  .chat-fab::before, .chat-teaser { animation: none; }
 }

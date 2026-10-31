@@ -142,7 +142,7 @@ def chat(body: dict):
     messages = []
     for h in history:
         role = "assistant" if h.get("role") == "assistant" else "user"
-        text = str(h.get("text", ""))[:1500]
+        text = str(h.get("text", ""))[:2500]
         if text and (not messages or messages[-1]["role"] != role):
             messages.append({"role": role, "content": [{"text": text}]})
     if messages and messages[0]["role"] != "user":
