@@ -106,7 +106,13 @@ def _swapped_hit3(text: str) -> bool:
 
 
 def _bare_95(text: str) -> bool:
-    return "95%" in text.replace(" %", "%") and not re.search(r"earlier|previous|first design|redesign|rerank|早期|之前|重排", text, re.I)
+    # Clair's wish: 95% hit@3 only as the earlier design's score that was later redesigned.
+    return bool(re.search(r"(?<![\d.])95\s*%", text)) and not re.search(
+        r"earlier|previous|first design|redesign|早期|之前|最初|重新设计|旧版", text, re.I)
+
+
+def _code_files(text: str) -> bool:
+    return len(re.findall(r"\w\.(?:py|js|ts|json|yaml|md|sh)\b", text)) >= 2
 
 
 CHECKS = [
@@ -114,7 +120,36 @@ CHECKS = [
     ("Step Functions claimed (no project uses it)", _step_functions, True),
     ("pgvector attributed to JesusSaysHi (it uses RAGFlow)", _pgvector_jesus, True),
     ("hit@3 numbers swapped (hybrid 91-93%, dense 87%)", _swapped_hit3, True),
-    ('"95% hit@3" without its configuration (warning only)', _bare_95, False),
+    ('"95% hit@3" without the earlier design it measured', _bare_95, True),
+    ("code file names shown as evidence", _code_files, True),
+]
+
+# Checks on a whole report line (requirement + mark), or on the summary line.
+REQ = r"^\s*([✓~✗])\s*(.*?)(?: — |$)"
+
+
+def _python_not_strong(line: str) -> bool:
+    # Python is in the profile's Skills list and every project: a plain Python requirement is ✓.
+    m = re.match(REQ, line)
+    return bool(m and m.group(1) != "✓" and re.fullmatch(
+        r"\s*(Python|熟练使用\s*Python|Python\s*(programming|编程|开发|development)?)\s*", m.group(2), re.I))
+
+
+def _bundle_with_step_functions(line: str) -> bool:
+    # No project uses Step Functions, so a requirement that lists it cannot be ✓.
+    m = re.match(REQ, line)
+    return bool(m and m.group(1) == "✓" and "Step Functions" in m.group(2))
+
+
+def _summary_calls_partial_a_gap(line: str) -> bool:
+    return bool(re.match(r"(Overall fit|整体匹配度)", line) and re.search(
+        r"Python[^。.;；]{0,12}(有待加强|不足|薄弱|欠缺|weak|gap|lack)", line, re.I))
+
+
+LINE_CHECKS = [
+    ("plain Python requirement not ✓", _python_not_strong),
+    ("requirement listing Step Functions marked ✓", _bundle_with_step_functions),
+    ("summary calls Python a weakness", _summary_calls_partial_a_gap),
 ]
 
 
@@ -198,6 +233,8 @@ def main() -> int:
         jd = JDS[i - 1]
         result = run_deployed(jd["text"]) if args.deployed else run_local(jd["text"])
         found = problems_in(result["report"].splitlines(), "report")
+        found += [(True, f"report: {desc}: {line.strip()[:200]}") for line in result["report"].splitlines()
+                  for desc, bad in LINE_CHECKS if bad(line)]
         for g in result.get("grades", []):
             found += problems_in([f"{f['claim']} ({f['project']})" for f in g.get("facts", [])],
                                  f"fact [{g['requirement']}]")
