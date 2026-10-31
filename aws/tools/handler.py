@@ -208,5 +208,21 @@ def bump(kind: str, limit: int) -> bool:
         return True
     except ClientError as exc:
         if exc.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            alert_once(f"{kind}#{now:%Y-%m-%d}", f"[Clair site] Daily limit reached: {kind} {limit}/{limit}",
+                       f"The site used today's {limit} '{kind}' (UTC day {now:%Y-%m-%d}). "
+                       "Visitors are told to try tomorrow or use GitHub; it resets at 00:00 UTC.")
             return False
         raise
+
+
+def alert_once(key: str, subject: str, body: str) -> None:
+    """Email Clair (the visitor-message SNS topic) the first time `key` happens; later calls are silent."""
+    try:
+        ddb.update_item(
+            TableName=COUNTER_TABLE, Key={"pk": {"S": f"alert#{key}"}},
+            UpdateExpression="SET expires = :exp", ConditionExpression="attribute_not_exists(pk)",
+            ExpressionAttributeValues={":exp": {"N": str(int(time.time()) + 15 * 86400)}})
+        sns.publish(TopicArn=TOPIC_ARN, Subject=subject[:100], Message=body)
+    except ClientError as exc:
+        if exc.response["Error"]["Code"] != "ConditionalCheckFailedException":
+            print(json.dumps({"event": "alert_error", "key": key, "message": str(exc)[:300]}))

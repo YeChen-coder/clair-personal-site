@@ -207,6 +207,8 @@
   text-align: left;
 }
 .chat-chip:hover { border-color: var(--gold); color: var(--ink); }
+.chat-chip:disabled { cursor: not-allowed; border-style: dashed; color: var(--ink-faint); }
+.chat-chip:disabled:hover { border-color: var(--line); color: var(--ink-faint); }
 
 .chat-form {
   display: flex;

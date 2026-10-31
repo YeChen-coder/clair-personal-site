@@ -38,6 +38,11 @@ DAILY_LIMIT = int(os.environ.get("DAILY_LIMIT", "80"))
 MESSAGE_DAILY_LIMIT = int(os.environ.get("MESSAGE_DAILY_LIMIT", "10"))
 # Each wake-up keeps Aurora running ~5 minutes; this caps how long callers can keep it awake per day.
 WARM_DAILY_LIMIT = int(os.environ.get("WARM_DAILY_LIMIT", "100"))
+# Shared with the agent (aws/agent/main.py): /warm tells the chat whether job-fit is open right now.
+JOB_FIT_DAILY_LIMIT = int(os.environ.get("JOB_FIT_DAILY_LIMIT", "10"))
+WEEKLY_JOB_FIT_BUDGET = float(os.environ.get("WEEKLY_JOB_FIT_BUDGET", "2.5"))  # USD of model spend per ISO week
+LIMIT_NAMES = {"day": "chat answers", "job_fit": "job-fit analyses", "msg": "visitor messages",
+               "warm": "database wake-ups"}
 MAX_TOKENS = int(os.environ.get("MAX_TOKENS", "700"))
 MAX_STEPS = 4
 GITHUB = "https://github.com/YeChen-coder/"
@@ -117,9 +122,10 @@ def lambda_handler(event, context):
     except json.JSONDecodeError:
         return reply(400, {"error": "bad_json"})
     if path == "/warm":
+        status = job_fit_status()
         if not bump("warm", WARM_DAILY_LIMIT):
-            return reply(200, {"state": "skipped"})
-        return reply(200, {"state": wake(wait_seconds=0)})
+            return reply(200, {"state": "skipped", "job_fit": status})
+        return reply(200, {"state": wake(wait_seconds=0), "job_fit": status})
     if path == "/chat":
         try:
             return chat(body)
@@ -354,8 +360,45 @@ def bump(kind: str, limit: int) -> bool:
         return True
     except ClientError as exc:
         if exc.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            alert_once(f"{kind}#{now:%Y-%m-%d}",
+                       f"[Clair site] Daily limit reached: {LIMIT_NAMES.get(kind, kind)} {limit}/{limit}",
+                       f"The site used today's {limit} {LIMIT_NAMES.get(kind, kind)} (UTC day {now:%Y-%m-%d}). "
+                       "Visitors see a friendly notice; it resets at 00:00 UTC.")
             return False
         raise
+
+
+def alert_once(key: str, subject: str, body: str) -> None:
+    """Email Clair (the visitor-message SNS topic) the first time `key` happens; later calls are silent."""
+    try:
+        ddb.update_item(
+            TableName=COUNTER_TABLE, Key={"pk": {"S": f"alert#{key}"}},
+            UpdateExpression="SET expires = :exp", ConditionExpression="attribute_not_exists(pk)",
+            ExpressionAttributeValues={":exp": {"N": str(int(time.time()) + 15 * 86400)}})
+        sns.publish(TopicArn=TOPIC_ARN, Subject=subject[:100], Message=body)
+    except ClientError as exc:
+        if exc.response["Error"]["Code"] != "ConditionalCheckFailedException":
+            print(json.dumps({"event": "alert_error", "key": key, "message": str(exc)[:300]}))
+
+
+def week_key() -> str:
+    year, week, _ = datetime.now(timezone.utc).isocalendar()
+    return f"spend#{year}-W{week:02d}"
+
+
+def job_fit_status() -> str:
+    """'available', 'weekly_limit' or 'daily_limit', from the counters the agent keeps."""
+    try:
+        def count(pk: str) -> float:
+            item = ddb.get_item(TableName=COUNTER_TABLE, Key={"pk": {"S": pk}}).get("Item") or {}
+            return float(item.get("n", {}).get("N", "0"))
+        if count(week_key()) / 1e6 >= WEEKLY_JOB_FIT_BUDGET:
+            return "weekly_limit"
+        if count(f"job_fit#{datetime.now(timezone.utc):%Y-%m-%d}") >= JOB_FIT_DAILY_LIMIT:
+            return "daily_limit"
+    except ClientError as exc:
+        print(json.dumps({"event": "status_error", "message": str(exc)[:300]}))
+    return "available"
 
 
 def reply(status: int, payload: dict):

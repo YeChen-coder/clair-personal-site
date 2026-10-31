@@ -53,11 +53,18 @@ MAX_STEPS = 4
 HISTORY_CHARS = 2500  # per past turn; a whole fit report fits. Must match chat.js.
 MAX_QUESTION = 6000  # long enough for a pasted job description
 JOB_FIT_DAILY_LIMIT = int(os.environ.get("JOB_FIT_DAILY_LIMIT", "10"))  # 4 model calls each
+# Weekly model-spend account (all answers count; only job-fit stops when it is reached). Kept as
+# micro-dollars in counter item spend#<ISO year>-W<week>; lambda/handler.py reads it for /warm.
+WEEKLY_JOB_FIT_BUDGET = float(os.environ.get("WEEKLY_JOB_FIT_BUDGET", "2.5"))
+PRICE_PER_M = (1.0, 5.0)  # USD per million input / output tokens, Claude Haiku 4.5 on Bedrock
+TOPIC_ARN = os.environ.get("TOPIC_ARN", "")  # the visitor-message topic: also used for limit alerts
+LIMIT_NAMES = {"day": "chat answers", "job_fit": "job-fit analyses"}
 # Clair's profile: the site's hand-written llms.txt, copied into the code package by build_agent.py.
 PROFILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "profile.txt")
 
 runtime = boto3.client("bedrock-runtime", region_name=REGION)
 ddb = boto3.client("dynamodb", region_name=REGION)
+sns = boto3.client("sns", region_name=REGION)
 tracer = trace.get_tracer("clair-chat-agent")
 
 SYSTEM = """You are the assistant on Clair Y.Chen's personal website. Visitors, often recruiters and \
@@ -199,8 +206,15 @@ def run_job_fit(state: dict) -> str:
     jd = state["question"]
     if len(jd) < 200:
         return "No job description in the message. Ask the visitor to paste the full job description."
+    if weekly_spend() >= WEEKLY_JOB_FIT_BUDGET:
+        return ("This week's job-fit budget is used up; it resets on Monday at 00:00 UTC. Tell the visitor, in "
+                "their language, that job-fit checks are paused for the rest of this week to keep the site's "
+                "running costs down, that everything else in this chat still works, and offer to pass the job "
+                "description to Clair as a message instead.")
     if not bump("job_fit", JOB_FIT_DAILY_LIMIT):
-        return "Today's job-fit analyses are used up. Offer to pass the job description to Clair as a message."
+        return ("Today's job-fit analyses are used up; they reset at 00:00 UTC. Tell the visitor, in their "
+                "language, that the daily limit is there to keep the site's running costs down, that everything "
+                "else still works, and offer to pass the job description to Clair as a message instead.")
 
     def converse(**kwargs):
         out = runtime.converse(modelId=MODEL_ID, **kwargs)
@@ -287,6 +301,7 @@ def chat(body: dict) -> dict:
         "event": "chat", "tools": state["tools"], "total_ms": round((time.perf_counter() - started) * 1000),
         "input_tokens": state["usage"][0], "output_tokens": state["usage"][1],
     }))
+    add_spend((state["usage"][0] * PRICE_PER_M[0] + state["usage"][1] * PRICE_PER_M[1]) / 1e6)
     if not answer:
         return {"error": "empty", "status": 502}
     reply = {"answer": answer, "sources": state["sources"][:6], "image": state["image"], "ticket": state["ticket"]}
@@ -312,8 +327,67 @@ def bump(kind: str, limit: int) -> bool:
         return True
     except ClientError as exc:
         if exc.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            alert_once(f"{kind}#{now:%Y-%m-%d}",
+                       f"[Clair site] Daily limit reached: {LIMIT_NAMES.get(kind, kind)} {limit}/{limit}",
+                       f"The site used today's {limit} {LIMIT_NAMES.get(kind, kind)} (UTC day {now:%Y-%m-%d}). "
+                       "Visitors see a friendly notice; it resets at 00:00 UTC.")
             return False
         raise
+
+
+def week_key() -> str:
+    year, week, _ = datetime.now(timezone.utc).isocalendar()
+    return f"spend#{year}-W{week:02d}"
+
+
+def weekly_spend() -> float:
+    """USD of model spend so far this ISO week (UTC); 0 if the counter cannot be read."""
+    try:
+        item = ddb.get_item(TableName=COUNTER_TABLE, Key={"pk": {"S": week_key()}}).get("Item") or {}
+        return float(item.get("n", {}).get("N", "0")) / 1e6
+    except ClientError as exc:
+        print(json.dumps({"event": "spend_error", "message": str(exc)[:300]}))
+        return 0.0
+
+
+def add_spend(usd: float) -> None:
+    """Add one answer's model cost to this week's account; email Clair at 80% and 100% of the budget."""
+    micro = int(round(usd * 1e6))
+    if micro <= 0:
+        return
+    try:
+        out = ddb.update_item(
+            TableName=COUNTER_TABLE, Key={"pk": {"S": week_key()}},
+            UpdateExpression="ADD n :m SET expires = :exp", ReturnValues="UPDATED_NEW",
+            ExpressionAttributeValues={":m": {"N": str(micro)},
+                                       ":exp": {"N": str(int(time.time()) + 15 * 86400)}})
+    except ClientError as exc:
+        print(json.dumps({"event": "spend_error", "message": str(exc)[:300]}))
+        return
+    total = float(out["Attributes"]["n"]["N"]) / 1e6
+    before = total - micro / 1e6
+    for share, words in ((0.8, "80% used"), (1.0, "used up: job-fit is paused until Monday 00:00 UTC")):
+        line = share * WEEKLY_JOB_FIT_BUDGET
+        if before < line <= total:
+            alert_once(f"{week_key()}#{int(share * 100)}",
+                       f"[Clair site] Weekly budget {int(share * 100)}%: ${total:.2f} of ${WEEKLY_JOB_FIT_BUDGET:.2f}",
+                       f"This week's model spend is ${total:.2f} of the ${WEEKLY_JOB_FIT_BUDGET:.2f} weekly budget "
+                       f"({words}). Normal chat keeps working either way.")
+
+
+def alert_once(key: str, subject: str, body: str) -> None:
+    """Email Clair (the visitor-message SNS topic) the first time `key` happens; later calls are silent."""
+    if not TOPIC_ARN:
+        return
+    try:
+        ddb.update_item(
+            TableName=COUNTER_TABLE, Key={"pk": {"S": f"alert#{key}"}},
+            UpdateExpression="SET expires = :exp", ConditionExpression="attribute_not_exists(pk)",
+            ExpressionAttributeValues={":exp": {"N": str(int(time.time()) + 15 * 86400)}})
+        sns.publish(TopicArn=TOPIC_ARN, Subject=subject[:100], Message=body)
+    except ClientError as exc:
+        if exc.response["Error"]["Code"] != "ConditionalCheckFailedException":
+            print(json.dumps({"event": "alert_error", "key": key, "message": str(exc)[:300]}))
 
 
 # ---------- AgentCore Runtime HTTP contract: port 8080, GET /ping, POST /invocations ----------

@@ -28,6 +28,10 @@ Parameters:
   DailyLimit:
     Type: Number
     Default: 80
+  WeeklyJobFitBudget:
+    Type: Number
+    Default: 2.5
+    Description: USD of model spend per ISO week (UTC) after which job-fit analyses pause until Monday.
   BudgetUsd:
     Type: Number
     Default: 10
@@ -185,7 +189,7 @@ Resources:
                 Action: secretsmanager:GetSecretValue
                 Resource: !Ref SecretArn
               - Effect: Allow
-                Action: dynamodb:UpdateItem
+                Action: [dynamodb:UpdateItem, dynamodb:GetItem]  # GetItem: /warm reads the job-fit counters
                 Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CounterTableName}"
               - Effect: Allow
                 Action: dynamodb:PutItem
@@ -220,6 +224,7 @@ Resources:
           BUCKET: !Ref BucketName
           MESSAGES_TABLE: !Ref MessagesTable
           TOPIC_ARN: !Ref MessageTopic
+          WEEKLY_JOB_FIT_BUDGET: !Ref WeeklyJobFitBudget
 
   FunctionUrl:
     Type: AWS::Lambda::Url
@@ -410,8 +415,11 @@ Resources:
                 Action: bedrock-agentcore:InvokeGateway
                 Resource: !GetAtt Gateway.GatewayArn
               - Effect: Allow
-                Action: dynamodb:UpdateItem
+                Action: [dynamodb:UpdateItem, dynamodb:GetItem]  # GetItem: the weekly spend check
                 Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CounterTableName}"
+              - Effect: Allow
+                Action: sns:Publish  # one email when a daily cap or the weekly budget is reached
+                Resource: !Ref MessageTopic
               - Effect: Allow
                 Action: s3:GetObject
                 Resource: !Sub "arn:aws:s3:::${BucketName}/artifacts/*"
@@ -441,6 +449,8 @@ Resources:
         GATEWAY_URL: !GetAtt Gateway.GatewayUrl
         COUNTER_TABLE: !Ref CounterTableName
         DAILY_LIMIT: !Ref DailyLimit
+        WEEKLY_JOB_FIT_BUDGET: !Ref WeeklyJobFitBudget
+        TOPIC_ARN: !Ref MessageTopic
 
   # ---------- observability: traces into CloudWatch (AgentCore Observability / GenAI dashboard) ----------
   # Account-wide: X-Ray stores spans as CloudWatch Logs (Transaction Search). 1% of traces are indexed

@@ -14,7 +14,12 @@
       jdPlaceholder: "把职位描述（JD）整段粘贴到这里，然后发送…",
       sources: "参考：",
       limited: "问得太快啦，等一分钟再试。",
-      daily: "今天的提问额度用完了，明天再来，或者直接去 GitHub 看看。",
+      daily: "为了控制运行成本，这个小站每天的提问数量有上限，今天的已经用完了。明天再来，或者直接去 GitHub 看看。",
+      jdPaused: { weekly_limit: "JD 匹配本周额度已满（下周一恢复）", daily_limit: "JD 匹配今天额度已满（明天恢复）" },
+      notePaused: {
+        weekly_limit: "AI 根据 Clair 的公开项目和网站内容回答，可能出错。为了控制运行成本，JD 匹配每周有限额，本周已用完；其他问题照常回答，也可以把 JD 留言给 Clair，Clair 会亲自看。",
+        daily_limit: "AI 根据 Clair 的公开项目和网站内容回答，可能出错。为了控制运行成本，JD 匹配每天有限额，今天已用完；其他问题照常回答，也可以把 JD 留言给 Clair，Clair 会亲自看。",
+      },
       error: "出了点问题，稍后再试。",
       ticket: "留言编号：",
       photoAlt: "Clair 的猫",
@@ -35,7 +40,12 @@
       jdPlaceholder: "Paste the whole job description here, then send…",
       sources: "Sources: ",
       limited: "Too many questions at once. Try again in a minute.",
-      daily: "Today's question quota is used up. Come back tomorrow, or browse GitHub.",
+      daily: "To keep running costs down, this site answers a limited number of questions a day, and today's are used up. Come back tomorrow, or browse GitHub.",
+      jdPaused: { weekly_limit: "Job-fit paused this week (back Monday)", daily_limit: "Job-fit paused today (back tomorrow)" },
+      notePaused: {
+        weekly_limit: "Answers come from Clair's public projects and this site. The AI can be wrong. To keep running costs down, job-fit checks have a weekly limit and this week's is used up. Everything else still works, or leave the job description as a message for Clair.",
+        daily_limit: "Answers come from Clair's public projects and this site. The AI can be wrong. To keep running costs down, job-fit checks have a daily limit and today's is used up. Everything else still works, or leave the job description as a message for Clair.",
+      },
       error: "Something went wrong. Please try again later.",
       ticket: "Message ticket: ",
       photoAlt: "One of Clair's cats",
@@ -83,13 +93,15 @@
   const history = [];
   let busy = false;
   let warmedAt = 0;
+  let jobFit = "available"; // or "weekly_limit" / "daily_limit", as /api/warm reports
 
   function label() {
     root.querySelector(".chat-fab-label").textContent = t("open");
     root.querySelector(".chat-teaser-text").textContent = t("teaser");
     root.querySelector(".chat-teaser-close").setAttribute("aria-label", t("teaserClose"));
     root.querySelector(".chat-title").textContent = t("title");
-    root.querySelector(".chat-note").textContent = t("note");
+    const paused = jobFit !== "available";
+    root.querySelector(".chat-note").textContent = paused ? t("notePaused")[jobFit] : t("note");
     const close = root.querySelector(".chat-close");
     close.setAttribute("aria-label", t("close"));
     panel.setAttribute("aria-label", t("title"));
@@ -100,6 +112,12 @@
       b.type = "button";
       b.className = "chat-chip";
       b.textContent = chip.label || chip;
+      if (chip.paste && paused) {
+        // Job-fit has hit its weekly or daily limit: say so up front instead of after a pasted JD.
+        b.textContent = t("jdPaused")[jobFit];
+        b.disabled = true;
+        return b;
+      }
       // A "paste" chip doesn't send anything: it asks for the job description in the input box.
       b.addEventListener("click", () => {
         if (!chip.paste) return ask(chip);
@@ -123,7 +141,12 @@
       // The database pauses when idle; start waking it while the visitor types.
       if (Date.now() - warmedAt > 4 * 60 * 1000) {
         warmedAt = Date.now();
-        fetch("/api/warm", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }).catch(() => {});
+        fetch("/api/warm", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.job_fit && data.job_fit !== jobFit) { jobFit = data.job_fit; label(); }
+          })
+          .catch(() => {});
       }
     }
   }
