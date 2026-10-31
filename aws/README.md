@@ -72,24 +72,41 @@ orchestration of model calls that use the Gateway's knowledge search:
 triage agent ── analyze_job_fit ──▶ 1. extract    the requirements (≤ 12), as structured output
                                     2. research   per requirement, in parallel threads:
                                                   search_clair_kb via the Gateway, then a grader
-                                                  call: strong / partial / none + one line of evidence
-                                    3. write      the report from the grades only
-                                    4. verify     a checker call compares report and grades; one
-                                                  rewrite, else a report built from the grades in code
+                                                  call: strong / partial / none + up to 3 facts,
+                                                  each a short claim and the verbatim quote behind it
+                                       check      (code) each quote must be in the profile or a
+                                                  search result; the project is named from where it
+                                                  was found; tools, names and numbers in the claim
+                                                  must be in that same document or section
+                                    3. write      the summary sentence, from the grades only; the
+                                                  requirement lines are built in code from the facts
+                                    4. verify     a checker call compares each claim with its quote;
+                                                  failing facts are dropped
 ```
 
 - **Grounding**: the grader always sees Clair's profile (`../llms.txt`, copied into the code package
   at build time) next to the search results, so jobs and certifications count even when a search
   misses them. Rules: personal projects count fully; an adjacent technology (ECS for Kubernetes) or
   study notes alone are only partial; a feature of software Clair built is not Clair's own skill.
-- **No overclaiming**: the report may only use the grades; the verifier rejects anything the evidence
-  does not back, and words like "production" or "expert" are rejected in code.
+- **Attribution is done in code, not by a model**: early reports said "Ask Clair's AI uses API
+  Gateway" (it uses AgentCore Gateway), "pgvector in JesusSaysHi" (from a study note named
+  `PostgresQLRelatedAndInJesus.md`), and swapped JesusSaysHi's hit@3 numbers. The writer merged facts
+  from different projects into one line, and the old verifier only compared the report with the grades,
+  so it could not notice. Now every fact keeps the project of the place its quote was found, a fact
+  from the profile's Skills list is shown as "skills list" (it names no project), and a requirement
+  for Amazon API Gateway is at most partial unless a source names it. A claim that says more than its
+  source is dropped; if all of a requirement's claims fail, the verified quotes are shown instead, one
+  grade lower.
+- **No overclaiming**: words like "production" or "expert" are rejected in code.
+- **Regression check**: `scripts/check_job_fit.py` runs 4 job descriptions (one in Chinese) and fails
+  on the known misattributions; `--deployed` runs them against the live agent (uses the daily caps).
 - **The answer is the report**: it goes to the visitor unchanged, not through the triage model again.
 - **Follow-ups see every requirement**: the reply also carries `history_text`, the numbered list from
   step 1. `chat.js` stores it in the chat history in place of the pasted job description, so later
   questions get all requirements instead of the first part of a long posting (each past turn is cut
   to 2,500 characters, `HISTORY_CHARS`).
-- **Cost**: about 15 model calls and roughly $0.07 per analysis, 15 to 25 seconds; capped at 10 per day.
+- **Cost**: requirements + 3 model calls (15 for 12 requirements), roughly $0.10 per analysis, 20 to
+  30 seconds; capped at 10 per day.
   Each step is a span in the trace (`job_fit`, `job_fit research`).
 
 ## What the site deliberately does not do
@@ -138,7 +155,7 @@ invoke_agent clair_chat_agent           the whole question; clair.result = answe
 - **Daily caps** (DynamoDB counters, UTC day): 80 answered questions, 10 visitor messages,
   10 job-fit analyses, 100 database wake-ups.
 - **Per answer**: at most 4 model calls of at most 700 output tokens each. A knowledge question costs
-  about 5k input tokens on Claude Haiku 4.5; a job-fit analysis about 45k (roughly $0.06).
+  about 5k input tokens on Claude Haiku 4.5; a job-fit analysis about 90k (roughly $0.10).
 - **Idle cost**: Aurora scales to 0 ACU after 5 idle minutes. Runtime, Gateway and Lambda bill per
   use. Logs and spans are kept 14 days (a few KB per question; CloudWatch Logs bills per GB).
 - **Access**: the Lambda function URL, the Runtime and the Gateway all require IAM (SigV4); unsigned
@@ -157,13 +174,13 @@ invoke_agent clair_chat_agent           the whole question; clair.result = answe
 | `infra/schema.sql` | pgvector table Bedrock expects (`scripts/run_sql.sh`) |
 | `infra/app.yaml` | Stack `clair-chat-app`: knowledge base, Lambdas, AgentCore Gateway + target + Runtime, messages table, SNS, Worker IAM user, budget |
 | `agent/main.py` | The agent hosted on AgentCore Runtime |
-| `agent/job_fit.py` | The job-fit workflow (extract, research in parallel, write, verify) |
+| `agent/job_fit.py` | The job-fit workflow (extract, research in parallel, check in code, write, verify) |
 | `tools/handler.py` | The three tools, called through the Gateway |
 | `lambda/handler.py` | `/warm`, plus the fallback all-in-one agent (its tool code duplicates `tools/`) |
 | `sync/handler.py` | Knowledge sync, every 2 days |
 | `knowledge-docs.json` | Extra files the sync pulls beyond root READMEs |
 | `cats/` | `cats.json` + photos (kept out of git; see `cats.example.json`) |
-| `scripts/` | Deploy, build the agent zip, knowledge sync, cat upload, schema, site text export, `build_llms.mjs` |
+| `scripts/` | Deploy, build the agent zip, knowledge sync, cat upload, schema, site text export, `build_llms.mjs`, job-fit regression check |
 
 ## Common tasks
 
