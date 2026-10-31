@@ -164,8 +164,20 @@ invoke_agent clair_chat_agent           the whole question; clair.result = answe
   the Worker's IAM user. Billing data lags by hours, so this is the last line, not the first.
 - **Daily caps** (DynamoDB counters, UTC day): 80 answered questions, 10 visitor messages,
   10 job-fit analyses, 100 database wake-ups.
+- **Weekly job-fit budget**: every answer adds its model cost (tokens × Haiku 4.5 price) to
+  `spend#<ISO week>` in the counter table. At $2.50 (`WeeklyJobFitBudget`) job-fit pauses until Monday
+  00:00 UTC; normal chat keeps working. Unlike the account budget it is checked before each analysis,
+  so it stops on the spot instead of hours later.
+- **Visitors are told**: when the chat opens, `/api/warm` returns `job_fit` (`available`,
+  `weekly_limit` or `daily_limit`); `chat.js` greys out the job-fit chip and says why in the note
+  line. A pasted job description while paused gets the same explanation and an offer to pass it on
+  as a message.
+- **Clair is told**: the first time a daily cap is hit, and at 80% and 100% of the weekly budget, one
+  email goes out through the visitor-message SNS topic (`[Clair site] Daily limit reached: ...`,
+  `[Clair site] Weekly budget ...`). An `alert#...` item in the counter table keeps it to one per period.
 - **Per answer**: at most 4 model calls of at most 700 output tokens each. A knowledge question costs
-  about 5k input tokens on Claude Haiku 4.5; a job-fit analysis about 90k (roughly $0.10).
+  about 5k input tokens on Claude Haiku 4.5 (well under $0.01); a job-fit analysis about 26k
+  (roughly $0.04).
 - **Idle cost**: Aurora scales to 0 ACU after 5 idle minutes. Runtime, Gateway and Lambda bill per
   use. Logs and spans are kept 14 days (a few KB per question; CloudWatch Logs bills per GB).
 - **Access**: the Lambda function URL, the Runtime and the Gateway all require IAM (SigV4); unsigned
