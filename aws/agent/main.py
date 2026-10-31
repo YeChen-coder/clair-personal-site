@@ -50,9 +50,9 @@ COUNTER_TABLE = os.environ["COUNTER_TABLE"]
 DAILY_LIMIT = int(os.environ.get("DAILY_LIMIT", "80"))
 MAX_TOKENS = int(os.environ.get("MAX_TOKENS", "700"))
 MAX_STEPS = 4
-HISTORY_CHARS = 2500  # per past turn; a 12-line fit report fits whole. Must match chat.js.
+HISTORY_CHARS = 2500  # per past turn; a whole fit report fits. Must match chat.js.
 MAX_QUESTION = 6000  # long enough for a pasted job description
-JOB_FIT_DAILY_LIMIT = int(os.environ.get("JOB_FIT_DAILY_LIMIT", "10"))  # ~13 model calls each
+JOB_FIT_DAILY_LIMIT = int(os.environ.get("JOB_FIT_DAILY_LIMIT", "10"))  # 4 model calls each
 # Clair's profile: the site's hand-written llms.txt, copied into the code package by build_agent.py.
 PROFILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "profile.txt")
 

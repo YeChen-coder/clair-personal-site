@@ -69,11 +69,14 @@ one tool that runs inside the agent instead of behind the Gateway, because it is
 orchestration of model calls that use the Gateway's knowledge search:
 
 ```
-triage agent ── analyze_job_fit ──▶ 1. extract    the requirements (≤ 12), as structured output
-                                    2. research   per requirement, in parallel threads:
-                                                  search_clair_kb via the Gateway, then a grader
-                                                  call: strong / partial / none + up to 3 facts,
-                                                  each a short claim and the verbatim quote behind it
+triage agent ── analyze_job_fit ──▶ 1. extract    the requirements (≤ 10), as structured output
+                                    2. research   one search_clair_kb per requirement via the Gateway,
+                                                  in parallel (no model tokens); the top 3 results of
+                                                  each are pooled and de-duplicated
+                                       grade      ONE call reads the profile and the pooled documents
+                                                  once and grades every requirement: strong / partial
+                                                  / none + up to 3 facts, each a short claim and the
+                                                  verbatim quote behind it
                                        check      (code) each quote must be in the profile or a
                                                   search result; the project is named from where it
                                                   was found; tools, names and numbers in the claim
@@ -105,8 +108,10 @@ triage agent ── analyze_job_fit ──▶ 1. extract    the requirements (�
   step 1. `chat.js` stores it in the chat history in place of the pasted job description, so later
   questions get all requirements instead of the first part of a long posting (each past turn is cut
   to 2,500 characters, `HISTORY_CHARS`).
-- **Cost**: requirements + 3 model calls (15 for 12 requirements), roughly $0.10 per analysis, 20 to
-  30 seconds; capped at 10 per day.
+- **Cost**: 4 model calls whatever the number of requirements (extract, grade, summary, verify), plus
+  the triage turn. Grading used to be one call per requirement, each re-reading the whole profile and
+  six search results; that repetition was about three quarters of the old ~$0.10 per analysis.
+  Capped at 10 per day.
   Each step is a span in the trace (`job_fit`, `job_fit research`).
 
 ## What the site deliberately does not do
