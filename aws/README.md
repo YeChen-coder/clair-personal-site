@@ -100,6 +100,11 @@ triage agent ── analyze_job_fit ──▶ 1. extract    the requirements (�
   for Amazon API Gateway is at most partial unless a source names it. A claim that says more than its
   source is dropped; if all of a requirement's claims fail, the verified quotes are shown instead, one
   grade lower.
+- **Grade rules in code**: a plain skill the profile's Skills list names ("Python") is strong, shown
+  with that Skills line; a requirement that lists several technologies ("Bedrock, Lambda, DynamoDB,
+  Step Functions") is strong only if every one is in Clair's documents, otherwise partial with the
+  missing ones named. File lists, code maps and diagrams are never shown as evidence, and JesusSaysHi's
+  95% hit@3 may only appear as the earlier design's score. The summary may call only ✗ requirements gaps.
 - **No overclaiming**: words like "production" or "expert" are rejected in code.
 - **Regression check**: `scripts/check_job_fit.py` runs 4 job descriptions (one in Chinese) and fails
   on the known misattributions; `--deployed` runs them against the live agent (uses the daily caps).
