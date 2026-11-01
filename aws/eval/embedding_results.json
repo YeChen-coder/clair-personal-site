@@ -1,0 +1,976 @@
+{
+ "table": {
+  "titan-v2": {
+   "all": {
+    "n": 40,
+    "hit@1": 0.725,
+    "hit@3": 0.875,
+    "hit@5": 0.875,
+    "MRR@10": 0.8017361111111111
+   },
+   "zh questions": {
+    "n": 21,
+    "hit@1": 0.6190476190476191,
+    "hit@3": 0.7619047619047619,
+    "hit@5": 0.7619047619047619,
+    "MRR@10": 0.7017195767195767
+   },
+   "en questions": {
+    "n": 19,
+    "hit@1": 0.8421052631578947,
+    "hit@3": 1.0,
+    "hit@5": 1.0,
+    "MRR@10": 0.9122807017543859
+   },
+   "cross-language": {
+    "n": 6,
+    "hit@1": 0.5,
+    "hit@3": 0.6666666666666666,
+    "hit@5": 0.6666666666666666,
+    "MRR@10": 0.5555555555555556
+   }
+  },
+  "cohere-v4": {
+   "all": {
+    "n": 40,
+    "hit@1": 0.75,
+    "hit@3": 0.825,
+    "hit@5": 0.875,
+    "MRR@10": 0.8072916666666666
+   },
+   "zh questions": {
+    "n": 21,
+    "hit@1": 0.6666666666666666,
+    "hit@3": 0.6666666666666666,
+    "hit@5": 0.7619047619047619,
+    "MRR@10": 0.7123015873015873
+   },
+   "en questions": {
+    "n": 19,
+    "hit@1": 0.8421052631578947,
+    "hit@3": 1.0,
+    "hit@5": 1.0,
+    "MRR@10": 0.9122807017543859
+   },
+   "cross-language": {
+    "n": 6,
+    "hit@1": 0.5,
+    "hit@3": 0.6666666666666666,
+    "hit@5": 0.6666666666666666,
+    "MRR@10": 0.5555555555555556
+   }
+  },
+  "titan-v2 live KB (hybrid)": {
+   "all": {
+    "n": 40,
+    "hit@1": 0.7,
+    "hit@3": 0.85,
+    "hit@5": 0.875,
+    "MRR@10": 0.7729166666666667
+   },
+   "zh questions": {
+    "n": 21,
+    "hit@1": 0.6666666666666666,
+    "hit@3": 0.7619047619047619,
+    "hit@5": 0.8095238095238095,
+    "MRR@10": 0.7182539682539683
+   },
+   "en questions": {
+    "n": 19,
+    "hit@1": 0.7368421052631579,
+    "hit@3": 0.9473684210526315,
+    "hit@5": 0.9473684210526315,
+    "MRR@10": 0.8333333333333334
+   },
+   "cross-language": {
+    "n": 6,
+    "hit@1": 0.16666666666666666,
+    "hit@3": 0.3333333333333333,
+    "hit@5": 0.3333333333333333,
+    "MRR@10": 0.25
+   }
+  }
+ },
+ "per_question": {
+  "1": {
+   "q": "What certifications does Clair have?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "clair-site.en.md",
+     "clair-site.zh.md",
+     "clair-site.en.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "clair-site.en.md",
+     "clair-site.zh.md",
+     "clair-site.en.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "2": {
+   "q": "Clair 以前在微软做什么工作？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "clair-site.en.md",
+     "clair-site.zh.md",
+     "clair-site.zh.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "clair-site.zh.md",
+     "clair-site.zh.md",
+     "clair-site.en.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "3": {
+   "q": "Which university did Clair get the master's degree from?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "clair-site.en.md",
+     "clair-site.zh.md",
+     "clair-site.en.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "clair-site.en.md",
+     "clair-site.zh.md",
+     "clair-site.en.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "4": {
+   "q": "网站苹果树上的果子是按什么顺序排的？",
+   "titan-v2": {
+    "rank": 6,
+    "top3": [
+     "clair-personal-site__README_zh.md",
+     "clair-personal-site__README_zh.md",
+     "clair-personal-site__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 6,
+    "top3": [
+     "clair-personal-site__README_zh.md",
+     "clair-personal-site__README_zh.md",
+     "clair-personal-site__README.md"
+    ]
+   },
+   "live": {
+    "rank": 3
+   }
+  },
+  "5": {
+   "q": "How does the website chatbot keep its AWS bill under control?",
+   "titan-v2": {
+    "rank": 2,
+    "top3": [
+     "EBOBotToDigitalPet__ShootToTheAWSCloud_en.md",
+     "clair-personal-site__aws~README.md",
+     "EboBotOnAWSCloud__AWS成本估算_2026-09-10.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "clair-personal-site__aws~README.md",
+     "clair-personal-site__aws~README.md",
+     "EBOBotQwenRealtime__README.md"
+    ]
+   },
+   "live": {
+    "rank": 3
+   }
+  },
+  "6": {
+   "q": "网站上的聊天机器人用什么数据库存向量？",
+   "titan-v2": {
+    "rank": null,
+    "top3": [
+     "PhoneCallAgent__README_zh.md",
+     "LLMKnowledgeNoteAndImplementation__LangChainRelated.md",
+     "LLMKnowledgeNoteAndImplementation__LangChainRelated.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": null,
+    "top3": [
+     "LLMKnowledgeNoteAndImplementation__PostgresQLRelatedAndInJesus.md",
+     "LLMKnowledgeNoteAndImplementation__LangChainRelated.md",
+     "LLMKnowledgeNoteAndImplementation__AWSRagRelated.md"
+    ]
+   },
+   "live": {
+    "rank": null
+   }
+  },
+  "7": {
+   "q": "网站聊天里的职位匹配分析是怎么做的？",
+   "titan-v2": {
+    "rank": null,
+    "top3": [
+     "SpecterSaysHi__README_zh.md",
+     "EBOBotQwenRealtime__IMPLEMENTATION_PLAN.md",
+     "PhoneCallAgent__README_zh.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": null,
+    "top3": [
+     "SpecterSaysHi__README_zh.md",
+     "JesusSaysHi__README-zh.md",
+     "ResumeBuilder__README.md"
+    ]
+   },
+   "live": {
+    "rank": null
+   }
+  },
+  "8": {
+   "q": "How was the FeatherTalk lip-sync model trained?",
+   "titan-v2": {
+    "rank": 2,
+    "top3": [
+     "JesusSaysHi__README.md",
+     "SpecterSaysHi__README.md",
+     "SpecterSaysHi__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "SpecterSaysHi__README.md",
+     "SpecterSaysHi__README_zh.md",
+     "SpecterSaysHi__README.md"
+    ]
+   },
+   "live": {
+    "rank": 2
+   }
+  },
+  "9": {
+   "q": "SpecterSaysHi 是怎么知道我到家了，然后主动说话的？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "SpecterSaysHi__README_zh.md",
+     "SpecterSaysHi__README_zh.md",
+     "SpecterSaysHi__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "SpecterSaysHi__README_zh.md",
+     "SpecterSaysHi__README_zh.md",
+     "SpecterSaysHi__README.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "10": {
+   "q": "How does JesusSaysHi make sure Bible verses are quoted exactly?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "clair-site.en.md",
+     "JesusSaysHi__README.md",
+     "JesusSaysHi__eval~replies_results.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 2,
+    "top3": [
+     "SpecterSaysHi__README.md",
+     "JesusSaysHi__README.md",
+     "clair-site.zh.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "11": {
+   "q": "JesusSaysHi 用 RAGFlow 做检索的效果怎么样？",
+   "titan-v2": {
+    "rank": 2,
+    "top3": [
+     "SpecterSaysHi__README_zh.md",
+     "JesusSaysHi__README-zh.md",
+     "JesusSaysHi__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 4,
+    "top3": [
+     "SpecterSaysHi__README_zh.md",
+     "LLMKnowledgeNoteAndImplementation__AWSRagRelated.md",
+     "LLMKnowledgeNoteAndImplementation__RAGRelated.md"
+    ]
+   },
+   "live": {
+    "rank": 3
+   }
+  },
+  "12": {
+   "q": "Which reranker does the Jesus project use?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "JesusSaysHi__ROADMAP.md",
+     "JesusSaysHi__README.md",
+     "JesusSaysHi__ROADMAP.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "JesusSaysHi__README.md",
+     "JesusSaysHi__README-zh.md",
+     "JesusSaysHi__README.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "13": {
+   "q": "What does the Jesus bot do if someone talks about suicide or self-harm?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "JesusSaysHi__README.md",
+     "clair-site.en.md",
+     "JesusSaysHi__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "JesusSaysHi__README.md",
+     "JesusSaysHi__README-zh.md",
+     "JesusSaysHi__README-zh.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "14": {
+   "q": "耶稣数字人的回答忠实度是怎么评测的？",
+   "titan-v2": {
+    "rank": 2,
+    "top3": [
+     "JesusSaysHi__eval~replies_results.md",
+     "JesusSaysHi__README-zh.md",
+     "JesusSaysHi__README-zh.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "JesusSaysHi__README-zh.md",
+     "JesusSaysHi__README-zh.md",
+     "JesusSaysHi__README-zh.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "15": {
+   "q": "EBO 机器人是怎么接进 Home Assistant 的？",
+   "titan-v2": {
+    "rank": 9,
+    "top3": [
+     "EboBotOnAWSCloud__EBO_Fargate架构与诊断Agent调研报告.md",
+     "EboBotOnAWSCloud__EBO_Fargate架构与诊断Agent调研报告.md",
+     "EBOBotToDigitalPet__ebo-ai-home~ops~diagnostics~HEALTH-REPORT.zh-CN.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 4,
+    "top3": [
+     "EboBotOnAWSCloud__EBO_Fargate架构与诊断Agent调研报告.md",
+     "EBOBotQwenRealtime__README.md",
+     "EboBotOnAWSCloud__EBO_Fargate架构与诊断Agent调研报告.md"
+    ]
+   },
+   "live": {
+    "rank": 4
+   }
+  },
+  "16": {
+   "q": "What does the EBO diagnostic agent do when something breaks at night?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "EBOBotToDigitalPet__ebo-ai-home~ops~diagnostics~README.zh-CN.md",
+     "EboBotOnAWSCloud__EBO_Fargate_Architecture_and_Local_Diagnostic_Agent_Report.en.md",
+     "EBOBotToDigitalPet__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "EBOBotToDigitalPet__ebo-ai-home~ops~diagnostics~README.zh-CN.md",
+     "EBOBotToDigitalPet__ebo-ai-home~docs~COMPLETE-VERSION-INTRO.en.md",
+     "EBOBotToDigitalPet__ebo-ai-home~ops~diagnostics~HEALTH-REPORT.zh-CN.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "17": {
+   "q": "EBO 部署到 AWS 上一个月大概要花多少钱？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "EboBotOnAWSCloud__AWS成本估算_2026-09-10.md",
+     "EboBotOnAWSCloud__AWS成本估算_2026-09-10.md",
+     "EboBotOnAWSCloud__cloud~部署验收记录.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "EboBotOnAWSCloud__AWS成本估算_2026-09-10.md",
+     "EBOBotToDigitalPet__README_zh.md",
+     "EBOBotToDigitalPet__README_zh.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "18": {
+   "q": "Why was the memory of the Fargate task reduced, and was it safe?",
+   "titan-v2": {
+    "rank": 3,
+    "top3": [
+     "EboBotOnAWSCloud__README_zh.md",
+     "EboBotOnAWSCloud__README.md",
+     "EboBotOnAWSCloud__Fargate内存降配评估_2026-09-12.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 3,
+    "top3": [
+     "EboBotOnAWSCloud__README.md",
+     "EboBotOnAWSCloud__cloud~部署验收记录.md",
+     "EboBotOnAWSCloud__Fargate内存降配评估_2026-09-12.md"
+    ]
+   },
+   "live": {
+    "rank": null
+   }
+  },
+  "19": {
+   "q": "怎么在 CloudWatch 里查看 EBO 的对话日志？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "EboBotOnAWSCloud__cloud~CloudWatch对话日志查看指南.md",
+     "EboBotOnAWSCloud__cloud~CloudWatch对话日志查看指南.md",
+     "EboBotOnAWSCloud__EBO_Fargate架构与诊断Agent调研报告.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "EboBotOnAWSCloud__cloud~CloudWatch对话日志查看指南.md",
+     "EboBotOnAWSCloud__cloud~CloudWatch对话日志查看指南.md",
+     "EboBotOnAWSCloud__cloud~CloudWatch对话日志查看指南.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "20": {
+   "q": "Without a wake word, how does the Qwen EBO robot ignore TV dialogue?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "EBOBotQwenRealtime__README.md",
+     "EBOBotQwenRealtime__README_zh.md",
+     "EBOBotQwenRealtime__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "EBOBotQwenRealtime__README.md",
+     "EBOBotQwenRealtime__README_zh.md",
+     "EBOBotQwenRealtime__README.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "21": {
+   "q": "千问版 EBO 的记忆功能是怎么设计的？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "EBOBotQwenRealtime__docs~memory-plan.md",
+     "EBOBotQwenRealtime__IMPLEMENTATION_PLAN.md",
+     "EBOBotQwenRealtime__IMPLEMENTATION_PLAN.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "EBOBotQwenRealtime__docs~memory-plan.md",
+     "EBOBotQwenRealtime__docs~memory-plan.md",
+     "EBOBotQwenRealtime__docs~memory-plan.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "22": {
+   "q": "What went wrong in the September 16 realtime assistant source audio incident?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "EBOBotToDigitalPet__ebo-ai-home~incident-response~2026-09-16-realtime-assistant-source-audio~incident-report.en.md",
+     "EBOBotToDigitalPet__ebo-ai-home~incident-response~2026-09-16-realtime-assistant-source-audio~incident-report.zh-CN.md",
+     "EBOBotToDigitalPet__ShootToTheAWSCloud_en.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "EBOBotToDigitalPet__ebo-ai-home~incident-response~2026-09-16-realtime-assistant-source-audio~incident-report.en.md",
+     "EBOBotToDigitalPet__ebo-ai-home~incident-response~2026-09-16-realtime-assistant-source-audio~incident-report.zh-CN.md",
+     "EBOBotToDigitalPet__ShootToTheAWSCloud_en.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "23": {
+   "q": "用户打断机器人说话时，回声问题是怎么处理的？",
+   "titan-v2": {
+    "rank": 8,
+    "top3": [
+     "SpecterSaysHi__README_zh.md",
+     "SpecterSaysHi__README_zh.md",
+     "SpecterSaysHi__README_zh.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 6,
+    "top3": [
+     "EBOBotToDigitalPet__ArchitecureNote.md",
+     "SpecterSaysHi__README_zh.md",
+     "EBOBotToDigitalPet__README_zh.md"
+    ]
+   },
+   "live": {
+    "rank": 6
+   }
+  },
+  "24": {
+   "q": "How does the chemistry test builder handle MathType formulas in Word files?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "tianjin-chem-bank__给妈妈的AI组卷V2~WORD_LATEX_REFACTOR_PLAN.md",
+     "tianjin-chem-bank__给妈妈的AI组卷V2~WORD_LATEX_REFACTOR_PLAN.md",
+     "tianjin-chem-bank__给妈妈的AI组卷V2~WORD_LATEX_REFACTOR_PLAN.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "tianjin-chem-bank__给妈妈的AI组卷V2~LATEX_HANDOFF.md",
+     "tianjin-chem-bank__给妈妈的AI组卷V2~LATEX_HANDOFF.md",
+     "tianjin-chem-bank__给妈妈的AI组卷V2~WORD_LATEX_REFACTOR_PLAN.md"
+    ]
+   },
+   "live": {
+    "rank": 2
+   }
+  },
+  "25": {
+   "q": "GLM 处理图片很慢的问题是怎么排查的？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "tianjin-chem-bank__docs~GLM性能与图片问题排查.md",
+     "tianjin-chem-bank__docs~validation.md",
+     "tianjin-chem-bank__docs~AI改题答案与双服务实测.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "tianjin-chem-bank__docs~GLM性能与图片问题排查.md",
+     "tianjin-chem-bank__docs~GLM性能与图片问题排查.md",
+     "tianjin-chem-bank__docs~validation.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "26": {
+   "q": "化学题库是怎么用 AI 批量补答案的？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "tianjin-chem-bank__docs~试卷批量补答案与逐小问核对.md",
+     "tianjin-chem-bank__README.md",
+     "tianjin-chem-bank__docs~AI补答案诊断与迭代.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 8,
+    "top3": [
+     "tianjin-chem-bank__给妈妈的AI组卷V2~LATEX_HANDOFF.md",
+     "tianjin-chem-bank__README.md",
+     "tianjin-chem-bank__README.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "27": {
+   "q": "Does ResumeBuilder use a cloud database or call AI APIs?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "ResumeBuilder__README.md",
+     "ResumeBuilder__README.md",
+     "ResumeBuilder__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "ResumeBuilder__README.md",
+     "ResumeBuilder__README.md",
+     "ResumeBuilder__README.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "28": {
+   "q": "彩色仿生阅读插件是给什么人用的？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "colorful-bionic-extension__README.md",
+     "colorful-bionic-extension__README_zh.md",
+     "clair-site.zh.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "colorful-bionic-extension__README_zh.md",
+     "colorful-bionic-extension__README.md",
+     "colorful-bionic-extension__README_zh.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "29": {
+   "q": "How does the Windows tool limit how long I can use an app?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "clair-site.en.md",
+     "website-restriction-extension__README.md",
+     "website-restriction-extension__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 2,
+    "top3": [
+     "website-restriction-extension__README.md",
+     "Windows-app-restriction__README.md",
+     "website-restriction-extension__README.md"
+    ]
+   },
+   "live": {
+    "rank": 2
+   }
+  },
+  "30": {
+   "q": "电击手环的蓝牙逆向项目是用来干嘛的？",
+   "titan-v2": {
+    "rank": 3,
+    "top3": [
+     "foci-reverse__README.md",
+     "SpecterSaysHi__README_zh.md",
+     "pavloc-reverse__README_zh.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "pavloc-reverse__README_zh.md",
+     "foci-reverse__README.md",
+     "pavloc-reverse__README.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "31": {
+   "q": "What is the FOCI reverse engineering project?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "foci-reverse__README.md",
+     "foci-reverse__README.md",
+     "SpecterSaysHi__README_zh.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "foci-reverse__README.md",
+     "foci-reverse__README.md",
+     "SpecterSaysHi__README_zh.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "32": {
+   "q": "PTE 口语练习工具能练哪些题型？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "PTE-Speaking-exercise__README_zh.md",
+     "PTE-Speaking-exercise__README.md",
+     "PTE-WritingFromDictation-exercise__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "PTE-Speaking-exercise__README_zh.md",
+     "PTE-Speaking-exercise__README_zh.md",
+     "PTE-Speaking-exercise__README_zh.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "33": {
+   "q": "Tell me about the AI phone receptionist for clinics.",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "PhoneCallAgent__README.md",
+     "PhoneCallAgent__README_zh.md",
+     "PhoneCallAgent__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "PhoneCallAgent__README.md",
+     "PhoneCallAgent__README_zh.md",
+     "PhoneCallAgent__README_zh.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "34": {
+   "q": "AniMatch 派对游戏是怎么算分的？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "AniMatch__README.md",
+     "JesusSaysHi__README-zh.md",
+     "JesusSaysHi__README-zh.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "AniMatch__README.md",
+     "JesusSaysHi__README-zh.md",
+     "JesusSaysHi__README-zh.md"
+    ]
+   },
+   "live": {
+    "rank": null
+   }
+  },
+  "35": {
+   "q": "What are Clair's notes on OpenSearch and RAG on AWS?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "LLMKnowledgeNoteAndImplementation__AWSRagRelated.md",
+     "LLMKnowledgeNoteAndImplementation__RAGRelated.md",
+     "LLMKnowledgeNoteAndImplementation__AWSRagRelated.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "LLMKnowledgeNoteAndImplementation__AWSRagRelated.md",
+     "LLMKnowledgeNoteAndImplementation__AWSRagRelated.md",
+     "LLMKnowledgeNoteAndImplementation__AWSRagRelated.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "36": {
+   "q": "Clair 对 MCP、Tool 和 Skill 的区别是怎么理解的？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "LLMKnowledgeNoteAndImplementation__MCP+Tool+Skill.md",
+     "LLMKnowledgeNoteAndImplementation__MCP+Tool+Skill.md",
+     "clair-site.en.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "LLMKnowledgeNoteAndImplementation__MCP+Tool+Skill.md",
+     "LLMKnowledgeNoteAndImplementation__MCP+Tool+Skill.md",
+     "LLMKnowledgeNoteAndImplementation__MCP+Tool+Skill.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "37": {
+   "q": "How does GPTSaysHi capture the audio from ChatGPT?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "GPTSaysHi__README.md",
+     "GPTSaysHi__README.md",
+     "GPTSaysHi__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "GPTSaysHi__README.md",
+     "GPTSaysHi__README.md",
+     "GPTSaysHi__README.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "38": {
+   "q": "第一次做的本地 AI 伴侣用了哪些开源项目？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "BeWithMe__README.md",
+     "BeWithMe__README_zh.md",
+     "LLMKnowledgeNoteAndImplementation__RAGRelated.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "BeWithMe__README.md",
+     "BeWithMe__README_zh.md",
+     "EBOBotQwenRealtime__README_zh.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "39": {
+   "q": "HabitBreaker 用什么模型检测玩手机？",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "HabitBreaker__README.md",
+     "HabitBreaker__README.md",
+     "foci-reverse__README.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "HabitBreaker__README.md",
+     "HabitBreaker__README.md",
+     "SpecterSaysHi__README_zh.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  },
+  "40": {
+   "q": "What was the lane keep assist RC car project?",
+   "titan-v2": {
+    "rank": 1,
+    "top3": [
+     "RCCarRelated__README.md",
+     "RCCarRelated__README.md",
+     "clair-site.en.md"
+    ]
+   },
+   "cohere-v4": {
+    "rank": 1,
+    "top3": [
+     "RCCarRelated__README.md",
+     "clair-site.en.md",
+     "clair-site.en.md"
+    ]
+   },
+   "live": {
+    "rank": 1
+   }
+  }
+ }
+}
