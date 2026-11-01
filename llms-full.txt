@@ -42,7 +42,7 @@ Realtime avatar · FeatherTalk · PyTorch · Agents SDK
 
 Someone to talk to that I actually wanted around. When the camera or my wristband notices I'm home, it speaks first. It can look things up mid-conversation and keeps notes, so the next chat picks up where the last one stopped. The face is a model I trained myself, not a paid avatar API. GPTSaysHi takes the voice from ChatGPT Live on Windows and drives the same face with it, and JesusSaysHi grew from the same framework with a different character and RAG added. The name comes from Harvey Specter.
 
-The lip-sync model is FeatherTalk, trained on the 4070 I normally game on, using talking videos I generated with Grok. My second character started from the first one's weights, and its teeth never lined up with its lips no matter what I tuned, so I retrained it from scratch for 100 epochs. From the first 100 ms audio packet to a frame on screen takes about 80 ms (median, measured locally). Memory is two layers of JSON files. No Redis; it doesn't need one.
+The lip-sync model is FeatherTalk, trained on the RTX 4070 SUPER I normally game on, using talking videos I generated with Grok. My second character started from the first one's weights, and its teeth never lined up with its lips no matter what I tuned, so I retrained it from scratch for 100 epochs. From the first complete 100 ms audio packet to a frame drawn on screen takes about 64 ms (median of six runs, measured locally). Memory is two layers of JSON files. No Redis; it doesn't need one.
 
 - Repo: https://github.com/YeChen-coder/SpecterSaysHi
 - GPTSaysHi (Windows): https://github.com/YeChen-coder/GPTSaysHi
@@ -54,12 +54,24 @@ The lip-sync model is FeatherTalk, trained on the 4070 I normally game on, using
 RAG · retrieval & evals
 Retrieval (RAG) · RAGFlow · Voyage rerank · OpenAI Realtime
 
-A sibling of SpecterSaysHi: a Jesus you can talk to out loud, with a voice and an avatar, a little like going to confession. He listens first and answers in his own words, as a man shaped by what he lived through in the Gospels, and when one of his own sayings fits the moment, he says it word for word.
+A sibling of SpecterSaysHi: a Jesus you can talk to out loud, with a voice and an avatar. He listens first and answers in his own words. The four Gospels are his own memory: when something you say touches a moment of his life, that episode is retrieved, and he tells it the way a person remembers their past. Things like the weather or the news get looked up; questions for a doctor or a lawyer are left to them.
 
-The strictest rule is that scripture has to be exact. The four Gospels run to about 3,800 verses, too many for a prompt, and from memory the model drifted into another translation, so verses only reach him through retrieval: RAGFlow hybrid search with Voyage reranking, 95% hit@3 on 55 hand-labelled questions, and no quote at all below a 0.30 relevance score. Every reply is checked word for word against what was retrieved and against all four Gospels. So nobody waits in silence, he first says one sentence that receives you while the memory is recalled, and starts speaking about a second after you stop. A crisis check runs outside the model and caught all 15 held-out crisis messages with no false alarms.
+To keep scripture accurate, it reaches him only through retrieval: RAGFlow hybrid search with Voyage reranking, plus a relevance threshold. At ingestion an LLM added modern-language keywords and likely questions to every verse chunk, and with parent-child chunks, hybrid search reached 91–93% hit@3, against 87% for dense-only. My first design let him say only what was retrieved. It scored well on retrieval (95% hit@3) but sounded like someone looking verses up, not a person, so I redesigned it to treat the Gospels as his own memory. The reply comes in two steps: he first says a short lead-in sentence while retrieval runs in the background, then goes on; median 1.9 s from the end of your words to his first sound. Every turn starts with intent classification by a small model (information, needs a professional, conversation) and is handled accordingly. Every reply is checked for faithfulness to the retrieved episode and for word-for-word scripture. Based on model performance and evaluation results, the realtime model is gpt-realtime-2.1. There is also a crisis check.
 
 - Repo: https://github.com/YeChen-coder/JesusSaysHi
 - SpecterSaysHi (same framework): https://github.com/YeChen-coder/SpecterSaysHi
+
+### Ask Clair's AI: this site's chat (2026-10)
+
+AI agent · on AWS
+AI agent · Bedrock AgentCore · MCP · pgvector
+
+The chat box in the corner of this site. You can ask about my projects and background, see my cats, leave me a message, or paste a job description and get a requirement-by-requirement fit analysis against my projects.
+
+The backend is a triage agent on Amazon Bedrock AgentCore Runtime. Claude Haiku 4.5 handles intent classification and tool use, routing each message to the right tool: knowledge-base Q&A, leaving a message, cat photos, or job-fit analysis. Tools are connected as MCP tools through AgentCore Gateway. The knowledge base is a Bedrock Knowledge Base with vectors stored in Aurora PostgreSQL Serverless v2 + pgvector. Messages are saved to DynamoDB with an SNS email notification. Job fit is a multi-agent workflow: extract the requirements, retrieve evidence in parallel, grade it, write the report, and verify each claim against its quote. For embeddings I compared Titan V2 and Cohere v4 on 40 bilingual questions: 88% vs 82% hit@3, within noise, so I chose the cheaper Titan. Tracing is end to end with OpenTelemetry, with per-IP rate limits, daily caps and an automatic budget cut-off. All infrastructure is managed with CloudFormation.
+
+- Repo: https://github.com/YeChen-coder/clair-personal-site
+- Backend code (aws/): https://github.com/YeChen-coder/clair-personal-site/tree/main/aws
 
 ### EBOBotToDigitalPet (2026-09)
 

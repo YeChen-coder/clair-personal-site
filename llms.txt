@@ -11,9 +11,9 @@
 Every item below is used in at least one project listed on this page.
 
 - LLM agents and orchestration: tool calling (Amazon Bedrock Converse, MCP), multi-agent workflows (parallel research, writer and verifier), Amazon Bedrock AgentCore (Runtime, Gateway), OpenAI Agents SDK, Codex SDK
-- Retrieval-augmented generation: Bedrock Knowledge Bases, Aurora PostgreSQL pgvector, RAGFlow hybrid search, Voyage reranking, retrieval evaluation
+- Retrieval-augmented generation: Bedrock Knowledge Bases, Aurora PostgreSQL pgvector, RAGFlow hybrid search, Voyage reranking, retrieval evaluation (hit@k, MRR), embedding model comparison
 - Realtime voice AI: OpenAI Realtime, Qwen Omni Realtime, Whisper; low-latency audio-to-avatar pipelines
-- Model training: PyTorch; trained a lip-sync model (FeatherTalk) on a local GPU
+- Model training: PyTorch; trained a lip-sync model (FeatherTalk) on a local RTX 4070 SUPER
 - Cloud: AWS (Lambda, ECS/Fargate, DynamoDB, S3, Aurora Serverless, SNS, CloudFormation, CloudWatch/X-Ray via OpenTelemetry); Azure (3+ years of enterprise support)
 - Devices and integration: Home Assistant, RTSP, BLE reverse engineering, Raspberry Pi
 - Languages and apps: Python, TypeScript, React
@@ -22,10 +22,11 @@ Every item below is used in at least one project listed on this page.
 
 ### Ask Clair's AI — the chat on this website (2026-10)
 Code and architecture: https://github.com/YeChen-coder/clair-personal-site/tree/main/aws
-- Triage agent hosted on Amazon Bedrock AgentCore Runtime: Claude Haiku 4.5 tool use routes each visitor message to RAG over Clair's GitHub docs, a message ticket (DynamoDB + SNS email), a photo tool, or a job-fit analysis.
+- Triage agent hosted on Amazon Bedrock AgentCore Runtime: Claude Haiku 4.5 tool use routes each visitor message to RAG over Clair's GitHub docs (Bedrock Knowledge Base, vectors in Aurora PostgreSQL Serverless v2 + pgvector, which scales to zero when idle), a message ticket (DynamoDB + SNS email), a photo tool, or a job-fit analysis.
 - Job-fit analysis is a multi-agent workflow: extract the requirements from a pasted job description, research each in parallel, grade the evidence, write a report, and have a verifier check it against the evidence before anything reaches the visitor.
 - Tools are exposed as MCP tools through AgentCore Gateway; everything is CloudFormation; traced end to end with OpenTelemetry.
 - Cost and safety built in from the start: per-IP rate limits, daily caps, IAM-only endpoints and an automatic budget cut-off.
+- Chose the embedding model by measurement: Amazon Titan Text Embeddings V2 against Cohere Embed v4 on 40 bilingual visitor questions over 1,560 chunks (hit@3 88% vs 82%, within noise), so the knowledge base kept the cheaper Titan.
 
 ### EBOBotToDigitalPet and EBOBotQwenRealtime — a home robot that talks (2026-09, 2026-10)
 https://github.com/YeChen-coder/EBOBotToDigitalPet · https://github.com/YeChen-coder/EBOBotQwenRealtime
@@ -38,7 +39,7 @@ https://github.com/YeChen-coder/EBOBotToDigitalPet · https://github.com/YeChen-
 ### SpecterSaysHi — realtime voice companion with a self-trained avatar (2026-10)
 https://github.com/YeChen-coder/SpecterSaysHi
 - Voice companion that speaks first when a camera or wristband notices Clair is home, looks things up mid-conversation, and keeps two-layer memory between chats.
-- The face is a lip-sync model (FeatherTalk, PyTorch) Clair trained on a local RTX 4070, not a paid avatar API; about 80 ms from the first 100 ms audio packet to a frame on screen (median, measured locally).
+- The face is a lip-sync model (FeatherTalk, PyTorch) Clair trained on a local RTX 4070 SUPER, not a paid avatar API; about 64 ms from the first complete 100 ms audio packet to a frame drawn on screen (median of six runs, measured locally).
 - The same framework drives two sibling projects: GPTSaysHi (ChatGPT voice on Windows) and JesusSaysHi.
 
 ### JesusSaysHi — realtime voice character grounded in a fixed text (2026-10)
@@ -53,6 +54,7 @@ https://github.com/YeChen-coder/JesusSaysHi
 ## Other projects
 
 - [tianjin-chem-bank](https://github.com/YeChen-coder/tianjin-chem-bank): document AI that splits Word exam papers into a bank of 10,000+ questions, keeps formulas as LaTeX and exports native Word equations; AI-generated variants pass structure checks and a separate review. GLM, LaTeX, OOXML, SQLite.
+- [PhoneCallAgent](https://github.com/YeChen-coder/PhoneCallAgent): a learning demo, not a deployed product. AI phone receptionist for a fictional clinic with scheduling tools, tests and simulated calls. Twilio, OpenAI Realtime.
 - [ResumeBuilder](https://github.com/YeChen-coder/ResumeBuilder): local-first resume workspace with reusable bullets and Word/PDF export; AI output arrives as validated JSON. TypeScript, React, Drizzle.
 - [colorful-bionic-extension](https://github.com/YeChen-coder/colorful-bionic-extension): reading extension for ADHD readers, published on the Microsoft Edge Add-ons store.
 - [Attention brakes](https://github.com/YeChen-coder/Windows-app-restriction): limits chosen apps on Windows (Python, Win32) and websites in Edge (published extension).

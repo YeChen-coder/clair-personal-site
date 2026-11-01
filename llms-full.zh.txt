@@ -42,7 +42,7 @@ McMaster University · 工程硕士（系统与技术） · 加拿大安大略�
 
 一个我自己想要的、会说话的“人”。摄像头或手环发现我回来了，它会先开口；聊着天能顺手查网页，聊完把要点记下来，下次接着聊。脸是我自己训练的数字人模型，不是买来的接口。GPTSaysHi 是它的衍生版：直接拿 Windows 上 ChatGPT Live 的声音去驱动同一张脸；JesusSaysHi 是同一套框架上长出来的兄弟项目，换了角色，加了 RAG。名字来自 Harvey Specter。
 
-嘴型模型用的是 FeatherTalk，在我那张打游戏的 4070 上训，素材是用 Grok 生成的说话视频。第二个角色一开始是接着第一个角色的权重训的，牙和嘴唇怎么调都对不上，最后干脆从头训了 100 轮才顺眼。从收到第一个 100 ms 音频包到画面出来，本机实测中位数大约 80 ms。记忆就是两层 JSON 文件，没上 Redis，用不着。
+嘴型模型用的是 FeatherTalk，在我那张打游戏的 4070 SUPER 上训，素材是用 Grok 生成的说话视频。第二个角色一开始是接着第一个角色的权重训的，牙和嘴唇怎么调都对不上，最后干脆从头训了 100 轮才顺眼。从收到第一个完整的 100 ms 音频包到画面画到屏幕上，本机实测六次，中位数大约 64 ms。记忆就是两层 JSON 文件，没上 Redis，用不着。
 
 - 仓库: https://github.com/YeChen-coder/SpecterSaysHi
 - GPTSaysHi（Windows 版）: https://github.com/YeChen-coder/GPTSaysHi
@@ -54,12 +54,24 @@ McMaster University · 工程硕士（系统与技术） · 加拿大安大略�
 RAG · 检索与评测
 检索增强 · RAGFlow · Voyage rerank · OpenAI Realtime
 
-SpecterSaysHi 的兄弟项目：一个可以开口聊天的耶稣，有声音也有数字人，有点像去告解。他先听你说完，再用自己的话回应，像一个从福音书里走过来的人；话说到合适的地方，会一字不差地说出他自己说过的话。
+SpecterSaysHi 的兄弟项目：一个可以开口聊天的耶稣，有声音也有数字人。他先听你说完，再用自己的话回应。四福音书就是他自己的记忆：你说的话碰到他一生里的哪段经历，那一段就被找出来，他像人回忆往事那样讲给你听。天气、新闻这类问题他会去查；该问医生或律师的，留给医生和律师。
 
-最硬的规矩是：引用必须是原文。四福音大约 3,800 节，塞不进 prompt，而模型凭记忆背还会背成别的译本，所以经文只能靠检索送到他嘴边：RAGFlow 混合检索加 Voyage 重排，55 道手工标注的问题里 hit@3 到了 95%，相关度低于 0.30 就干脆不引。每句回复都和检索到的原文、四福音全文逐字比对。为了不让人干等，他先说一句接住你的话，同时在后台“回忆”经文，你说完大约一秒多他就开口。危机检测放在模型外面，留出来的 15 条危机消息全部识别，没有误报。
+为了保证经文准确，经文只靠检索送到他嘴边：RAGFlow 混合检索加 Voyage 重排，并设了一个相关度阈值。入库时让 LLM 给每段经文补上现代说法的关键词和可能的提问，再配合父子分块，混合检索的 hit@3 达到 91–93%，只用向量检索是 87%。最早的设计只让他说检索到的原文，检索分数不错（hit@3 95%），但听起来像在查经文，不像一个人，后来改成了现在把福音书当作他自己记忆的设计。回复分两步：他先说一句话做铺垫和衔接，同时在后台检索，再接着往下讲；从你说完到他出声，中位数 1.9 秒。每一轮先用小模型做意图识别（查资料、该找专业人士、聊天），再按类别处理。每句回复都会检查是否忠于检索到的经历、引用是否逐字。基于模型表现和评测结果，实时模型采用 gpt-realtime-2.1。另外加了危机检测。
 
 - 仓库: https://github.com/YeChen-coder/JesusSaysHi
 - SpecterSaysHi（同一套框架）: https://github.com/YeChen-coder/SpecterSaysHi
+
+### 这个网站的 AI 聊天 (2026-10)
+
+AI Agent · AWS 云端
+AI Agent · Bedrock AgentCore · MCP · pgvector
+
+就是这个网站右下角的聊天框。可以问我的项目和经历，看我家的猫，给我留言，也可以贴一份职位描述，让它对照我的项目逐条分析匹配度。
+
+后端是一个分诊 Agent，部署在 Amazon Bedrock AgentCore Runtime 上，用 Claude Haiku 4.5 做意图识别和工具调用，把每条消息分给对应的工具：知识库问答、留言、看猫的照片、职位匹配。工具通过 AgentCore Gateway 以 MCP 形式接入。知识库用 Bedrock Knowledge Base，向量存储在 Aurora PostgreSQL Serverless v2 + pgvector 中。留言写入 DynamoDB，并通过 SNS 邮件通知。职位匹配是一个多 Agent 流程：提取岗位要求、并行检索证据、评分、生成报告，最后由校验步骤逐条核对结论和引用。Embedding 模型对比了 Titan V2 和 Cohere v4，在 40 个中英文问题上 hit@3 分别为 88% 和 82%，差距在误差范围内，最终选用成本更低的 Titan。全链路使用 OpenTelemetry 追踪，并设置了按 IP 限流、每日调用上限和预算自动熔断。基础设施全部用 CloudFormation 管理。
+
+- 仓库: https://github.com/YeChen-coder/clair-personal-site
+- 后端代码（aws/）: https://github.com/YeChen-coder/clair-personal-site/tree/main/aws
 
 ### EBOBotToDigitalPet (2026-09)
 
