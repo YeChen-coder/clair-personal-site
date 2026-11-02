@@ -192,10 +192,18 @@ This llms.txt is currently used in two places:
 • The other is AWS Bedrock AgentCore: when the model generates answers and does job description matching, it needs this txt too.
 
 On syncing these two sources:
+
 • The original idea was to make the txt on Cloudflare the single source of truth and have AWS fetch it on the fly when needed. But that request got rejected with an error, and I haven't had time to look into why. Still, it's a viable path, and I'll tackle it first later.
+
 • Another solution is to store it in S3. But that doesn't really solve anything — I'd still have to log in to the AWS CLI on my device periodically, and constantly logging in is annoying.
 
 This is on hold for now. I've written a lot these past couple of days, so for now I just need to make sure the txt is up to date as of today; the other mechanisms can wait, since it doesn't change that often.
 
 3. Site copy updates
-The project descriptions on the site need updating too, and it's a fair amount of work. I'll have to review all that cringey, AI-flavored copy again — I really don't want to.
+The project descriptions on the site need updating too, and it's a fair amount of work. I'll have to review all that cringey, AI-flavored copy again — I really don't want to — it's updated now, and I've updated the résumé along with it.
+
+Ugh, speaking of the résumé, I have to rant again. Even though I really don't want to do this kind of thing, I have to admit that in the end I still have to go through the final deliverable myself and read it over.
+
+When I had the AI write my résumé, I told it not to write standard AI-sounding boilerplate. Instead it gave me something that was extremely AI-flavored in a chatty, colloquial way. Headache.
+
+Luckily it's all fixed now, and that's what matters.
