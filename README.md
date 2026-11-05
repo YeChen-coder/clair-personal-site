@@ -207,3 +207,22 @@ Ugh, speaking of the résumé, I have to rant again. Even though I really don't 
 When I had the AI write my résumé, I told it not to write standard AI-sounding boilerplate. Instead it gave me something that was extremely AI-flavored in a chatty, colloquial way. Headache.
 
 Luckily it's all fixed now, and that's what matters.
+
+---
+
+Nothing else going on, just that I've been a bit angry these past few days.
+
+Pulling job posting data for my job search used to be Googlebot's job, but now that's run into trouble:
+
+1. Googlebot's usage has been cut massively
+2. If you interact with it from China for a while, its IP turns into a proxy in Zhengzhou, China
+
+Once it becomes a Zhengzhou proxy, Indeed's Cloudflare verification just gets stuck. I'm not even talking about the Cloudflare human check popping up anymore — that doesn't matter, at worst it annoys me and I click it by hand. The problem now is that Cloudflare can't even finish loading the verification page. That's Indeed; LinkedIn is a flat 403, no getting through at all.
+
+No way around it, so it's on to Muse — all I can do is let Muse give it a try.
+
+There's another problem, though: in the last step, when Codex uses Computer Use to fill in my information, this damn thing just fills in whatever! For example, when a question asks "how many years have you used Docker," it flat-out entered 0. I only found out because it had run out of tokens and I took a look in the morning at what it had actually filled in — and there it was, a 0 for Docker.
+
+My computer runs a pile of Docker every single day, and it has the nerve to put 0? For questions like this, where it has no idea and no information about me, it just dares to enter 0. This has happened plenty of times before; it even put 0 for "how many years have you used AI" — and the jobs I'm applying for are in AI!
+
+I'm really angry.
